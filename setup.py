@@ -9,12 +9,16 @@ env = os.environ.get('source')
 
 
 def get_dependencies():
-    dependency = []
+    dependency = [
+        "marshmallow==4.0.0",
+        "marshmallow-sqlalchemy==1.4.2",
+        "apispec==6.8.2"
+    ]
 
     if env and env == "code":
         return dependency
 
-    return dependency + []
+    return dependency + ["mw-common"]
 
 
 setup(

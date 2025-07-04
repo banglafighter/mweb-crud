@@ -1,0 +1,38 @@
+import random
+import string
+from mw_common.mw_const import HTTPContentType
+from mweb_crud.common.mweb_crud_const import SwaggerDefinitionType
+
+
+class SwaggerData:
+    url: str = None
+    query_params: list = None  # list of tuple [(name, data_type, required)]
+    url_params: list = None  # list of tuple [(name, data_type, required)]
+    request_obj = None
+    request_list = None
+    response_obj = None
+    response_list = None
+
+    def_type: str = SwaggerDefinitionType.NONE
+
+    method: str = None
+    tag: str = None
+    methods: list = []
+    tags: list = []
+    description: str = ""
+    response_content_type: str = HTTPContentType.APPLICATION_JSON
+    request_content_type: str = HTTPContentType.APPLICATION_JSON
+
+    mweb_message_response: bool = False
+    mweb_error_details_response: bool = False
+
+    http_response_code: int = 200
+
+    # Only for Internal Use
+    request_schema_key: str = None
+    response_schema_key: str = None
+
+    def init_schema_key(self):
+        component_code = ''.join(random.choice(string.ascii_lowercase) for i in range(12))
+        self.request_schema_key = "req_" + component_code
+        self.response_schema_key = "res_" + component_code

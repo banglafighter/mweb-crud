@@ -23,13 +23,13 @@ class MWebSwaggerUI:
             )
             controller.add_url_rule(MWebCRUDConfig.SWAGGER_JSON_URL, "swagger-json", self.swagger_json)
             controller.add_url_rule(MWebCRUDConfig.SWAGGER_UI_URL, "swagger-ui", self.swagger_ui)
-            self._mweb_app.add_controller(controller)
+            self._mweb_app.register_controller(controller)
 
-    def swagger_ui(self):
+    async def swagger_ui(self):
         auth = self.check_auth()
         if auth:
             return auth
-        return template.sync_render('swagger-ui.html', config=MWebCRUDConfig)
+        return await template.render('swagger-ui.html', config=MWebCRUDConfig)
 
     def swagger_json(self):
         auth = self.check_auth()

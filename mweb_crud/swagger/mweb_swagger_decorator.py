@@ -17,7 +17,7 @@ def add_swagger_endpoint(
         function.__mweb_swagger__ = SwaggerCommon.MWEB_SWAGGER
 
         @wraps(function)
-        def mweb_swagger_def(*args, **kwargs):
+        async def mweb_swagger_def(*args, **kwargs):
             if 'pass_definition' in kwargs and kwargs['pass_definition']:
                 definition = SwaggerData()
                 definition.request_obj = request_obj
@@ -35,7 +35,7 @@ def add_swagger_endpoint(
                 definition.def_type = def_type
                 definition.mweb_message_response = mweb_message_response
                 return definition
-            return function(*args, **kwargs)
+            return await function(*args, **kwargs)
 
         return mweb_swagger_def
 

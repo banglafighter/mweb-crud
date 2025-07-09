@@ -20,14 +20,14 @@ class MWebSDProcessor:
     def __init__(self, mweb_app: MWebBase):
         self._mweb_app = mweb_app
 
-    def get_action_definitions(self):
+    async def get_action_definitions(self):
         definitions = []
         for rule in self._mweb_app.url_map.iter_rules():
             endpoint = self._mweb_app.view_functions[rule.endpoint]
             if isinstance(endpoint, types.FunctionType):
                 function_name = endpoint.__name__
                 if function_name and self._is_it_swagger_definition(endpoint):
-                    definition = endpoint(pass_definition=True)
+                    definition = await endpoint(pass_definition=True)
                     definition = self._process_action_decorator(definition, rule)
                     if definition:
                         definitions.append(definition)

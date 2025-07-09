@@ -31,12 +31,12 @@ class MWebSwaggerUI:
             return auth
         return await template.render('swagger-ui.html', config=MWebCRUDConfig)
 
-    def swagger_json(self):
+    async def swagger_json(self):
         auth = self.check_auth()
         if auth:
             return auth
         decorator_processor = MWebSDProcessor(self._mweb_app)
-        action_definitions = decorator_processor.get_action_definitions()
+        action_definitions = await decorator_processor.get_action_definitions()
         mweb_swagger_generator = MWebSwaggerGenerator()
         mweb_swagger_generator.process_action_definitions(action_definitions)
         return mweb_swagger_generator.get_swagger_spec()

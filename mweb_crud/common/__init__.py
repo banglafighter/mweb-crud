@@ -1,0 +1,1 @@
+from mweb_crud.common.mweb_crud_exeption import MWebCRUDException

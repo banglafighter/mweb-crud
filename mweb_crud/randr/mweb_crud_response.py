@@ -1,0 +1,43 @@
+from dataclasses import dataclass
+from mw_common import SDLize
+from .mweb_crud_randr_const import MWebRESTResponseCode, MWebRESTResponseStatus
+from mweb_orm.common import Pagination
+
+
+@dataclass(kw_only=True)
+class MWebRESTResponseData(SDLize):
+    status: str = None
+    code: int = None
+    httpCode: int = None
+    message: str = None
+    data: dict | list = None
+    error: dict = None
+    pagination: Pagination = None
+
+    def set_pagination(self, data: list, pagination: Pagination):
+        self.data = data
+        pagination.items = None
+        self.pagination = pagination
+        return self
+
+
+class MWebRESTResponse:
+    @staticmethod
+    def unexpected_error(message: str = None) -> MWebRESTResponseData:
+        if not message:
+            message = "Unexpected Error"
+        return MWebRESTResponse.error(message=message)
+
+    @staticmethod
+    def error(message: str, error: dict = None, code: int = None, http_code: int = None) -> MWebRESTResponseData:
+        if not code:
+            code = MWebRESTResponseCode.error
+
+        response = MWebRESTResponseData(
+            code=code,
+            error=error,
+            httpCode=http_code,
+            status=MWebRESTResponseStatus.error,
+            message=message,
+        )
+        return response

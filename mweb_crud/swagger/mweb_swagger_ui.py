@@ -1,5 +1,5 @@
 from quart import request
-from mweb import MWebBase, SSRController, template
+from mweb import MWebBase, SSRController, MWebResponse
 from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
 from mweb_crud.swagger.mweb_sd_processor import MWebSDProcessor
 from mweb_crud.swagger.mweb_swagger_generator import MWebSwaggerGenerator
@@ -29,7 +29,7 @@ class MWebSwaggerUI:
         auth = self.check_auth()
         if auth:
             return auth
-        return await template.render('swagger-ui.html', config=MWebCRUDConfig)
+        return await MWebResponse.render_template('swagger-ui.html', config=MWebCRUDConfig)
 
     async def swagger_json(self):
         auth = self.check_auth()

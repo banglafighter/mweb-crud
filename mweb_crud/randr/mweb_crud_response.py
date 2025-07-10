@@ -27,8 +27,10 @@ class MWebRESTResponseData(SDLize):
         message_dict: dict = {}
         for field_name in errors:
             error_text = ""
-            for text in errors[field_name]:
-                error_text += str(text) + " "
+            messages = errors[field_name]
+            if messages and isinstance(messages, list):
+                for text in errors[field_name]:
+                    error_text += str(text) + " "
             message_dict[field_name] = error_text
         self.error = message_dict
         return self

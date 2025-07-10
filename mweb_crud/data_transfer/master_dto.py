@@ -1,5 +1,6 @@
 from marshmallow import EXCLUDE, Schema
 from sqlalchemy import inspect
+from mweb_crud.common import MWebCRUDException, MWebCRUDMessage
 from mweb_orm import MWebBaseModel
 
 
@@ -40,6 +41,7 @@ class MWebMasterDTO(Schema):
         return None
 
     def to_model(self, data: dict, model_instance: MWebBaseModel = None) -> MWebBaseModel | None:
+        self.validate(data=data, many=False, partial=False)
         validated_dict = self.load(data=data, unknown=EXCLUDE)
         if not validated_dict or not isinstance(validated_dict, dict):
             return None
@@ -54,8 +56,13 @@ class MWebMasterDTO(Schema):
 
         return model_instance
 
-    def validate(self, data: dict | list, many: bool = False, partial: bool = False) -> dict:
-        return super().validate(data, many=many, partial=partial)
+    def validate(self, data: dict | list, many: bool = False, partial: bool = False) -> dict | None:
+        setattr(self, "unknown", EXCLUDE)
+        errors = super().validate(data, many=many, partial=partial)
+        delattr(self, "unknown")
+        if errors and isinstance(errors, dict) and len(errors):
+            raise MWebCRUDException(message=MWebCRUDMessage.VALIDATION_ERROR, details=errors)
+        return None
 
     def to_dict(self, model: MWebBaseModel | list[MWebBaseModel], many: bool = False) -> dict:
         return self.dump(model, many=many)

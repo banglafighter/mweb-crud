@@ -13,12 +13,15 @@ class CRUDManager(MWebCRUDBase):
         self._response_maker = ResponseMaker()
         self._model = model
 
+    @property
     def request(self) -> RequestContext:
         return self._request_context
 
+    @property
     def response(self) -> ResponseMaker:
         return self._response_maker
 
+    @property
     def model(self) -> type[MWebBaseModel]:
         return self._model
 

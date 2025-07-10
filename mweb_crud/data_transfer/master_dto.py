@@ -1,10 +1,10 @@
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-from marshmallow import EXCLUDE
+from marshmallow import EXCLUDE, Schema
 from sqlalchemy import inspect
 from mweb_orm import MWebBaseModel
 
 
-class MWebMasterDTO(SQLAlchemyAutoSchema):
+class MWebMasterDTO(Schema):
+    model_class: type[MWebBaseModel] = None
 
     def _get_required_fields(self, model):
         mapper = inspect(model)
@@ -15,8 +15,8 @@ class MWebMasterDTO(SQLAlchemyAutoSchema):
         return required_fields
 
     def _get_model(self):
-        if (self.Meta and self.Meta.model and issubclass(self.Meta.model, MWebBaseModel)):
-            return self.Meta.model
+        if self.model_class and issubclass(self.model_class, MWebBaseModel):
+            return self.model_class
         return None
 
     def _get_required_field_values(self, model, data: dict, raise_exception=True):
@@ -49,13 +49,13 @@ class MWebMasterDTO(SQLAlchemyAutoSchema):
 
         if model_instance:
             for key, value in data.items():
-                if hasattr(model_instance, key):
+                if hasattr(model_instance, key) and key != "model_class":
                     setattr(model_instance, key, value)
 
         return model_instance
 
     def validate(self, data: dict | list, many: bool = False, partial: bool = False) -> dict:
-        return super().validate(data, many=False, partial=partial)
+        return super().validate(data, many=many, partial=partial)
 
     def to_dict(self, model: MWebBaseModel | list[MWebBaseModel], many: bool = False) -> dict:
         return self.dump(model, many=many)

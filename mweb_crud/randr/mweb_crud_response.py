@@ -20,6 +20,19 @@ class MWebRESTResponseData(SDLize):
         self.pagination = pagination
         return self
 
+    def set_error(self, errors: dict):
+        if errors is None:
+            return self
+
+        message_dict: dict = {}
+        for field_name in errors:
+            error_text = ""
+            for text in errors[field_name]:
+                error_text += str(text) + " "
+            message_dict[field_name] = error_text
+        self.error = message_dict
+        return self
+
 
 class MWebRESTResponse:
     @staticmethod

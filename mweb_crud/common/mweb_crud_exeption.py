@@ -14,11 +14,11 @@ class MWebCRUDException(MwException):
 
         self.response_data = MWebRESTResponseData(
             status=MWebRESTResponseStatus.error,
-            error=details,
             message=message,
             code=error_code,
             httpCode=http_code,
         )
+        self.response_data.set_error(errors=details)
 
     async def handle_exception(self, exception: MwException):
         response = MWebRESTResponse.unexpected_error()

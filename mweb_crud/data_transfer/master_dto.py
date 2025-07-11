@@ -1,24 +1,29 @@
-from marshmallow import EXCLUDE, Schema
+from marshmallow import EXCLUDE, Schema, RAISE
 from sqlalchemy import inspect
 from mweb_crud.common import MWebCRUDException, MWebCRUDMessage
-from mweb_orm import MWebBaseModel
+from mweb_orm import MWebBaseModel, MWebModel, MWebDatedModel, MWebIDModel
 
 
 class MWebMasterDTO(Schema):
     model_class: type[MWebBaseModel] = None
 
     def _get_required_fields(self, model):
-        mapper = inspect(model)
         required_fields = []
-        for column in mapper.columns:
-            if not column.nullable and not column.primary_key and column.default is None and column.server_default is None:
-                required_fields.append(column.key)
+        if model:
+            mapper = inspect(model)
+            for column in mapper.columns:
+                if not column.nullable and not column.primary_key and column.default is None and column.server_default is None:
+                    required_fields.append(column.key)
         return required_fields
 
-    def _get_model(self):
-        if self.model_class and issubclass(self.model_class, MWebBaseModel):
-            return self.model_class
-        return None
+    def _get_model(self, model_class: type[MWebBaseModel] = None):
+        if not model_class:
+            model_class = self.model_class
+
+        if model_class and issubclass(model_class, MWebBaseModel):
+            return model_class
+        else:
+            raise MWebCRUDException(message=f" model_class not in property. model_class: type[MWebBaseModel].")
 
     def _get_required_field_values(self, model, data: dict, raise_exception=True):
         required_fields = self._get_required_fields(model)
@@ -30,24 +35,24 @@ class MWebMasterDTO(Schema):
             else:
                 name_value_pairs[required_field] = data.get(required_field)
         if exception_messages and len(exception_messages) and raise_exception:
-            raise Exception(exception_messages)
+            raise MWebCRUDException(message=MWebCRUDMessage.VALIDATION_ERROR, details=exception_messages)
         return name_value_pairs
 
-    def _get_model_instance(self, data: dict):
-        model = self._get_model()
+    def _get_model_instance(self, data: dict, model_class: type[MWebBaseModel] = None):
+        model = self._get_model(model_class=model_class)
         name_value_pairs = self._get_required_field_values(model, data, raise_exception=True)
         if model:
             return model(**name_value_pairs)
         return None
 
-    def to_model(self, data: dict, model_instance: MWebBaseModel = None) -> MWebBaseModel | None:
+    def to_model(self, data: dict, model_class: type[MWebBaseModel] = None, model_instance: MWebModel | MWebDatedModel | MWebIDModel | MWebBaseModel = None) -> MWebBaseModel | None:
         self.validate(data=data, many=False, partial=False)
         validated_dict = self.load(data=data, unknown=EXCLUDE)
         if not validated_dict or not isinstance(validated_dict, dict):
             return None
 
         if not model_instance:
-            model_instance = self._get_model_instance(data)
+            model_instance = self._get_model_instance(data, model_class=model_class)
 
         if model_instance:
             for key, value in data.items():
@@ -59,7 +64,7 @@ class MWebMasterDTO(Schema):
     def validate(self, data: dict | list, many: bool = False, partial: bool = False) -> dict | None:
         setattr(self, "unknown", EXCLUDE)
         errors = super().validate(data, many=many, partial=partial)
-        delattr(self, "unknown")
+        setattr(self, "unknown", RAISE)
         if errors and isinstance(errors, dict) and len(errors):
             raise MWebCRUDException(message=MWebCRUDMessage.VALIDATION_ERROR, details=errors)
         return None

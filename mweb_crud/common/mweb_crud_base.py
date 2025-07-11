@@ -4,7 +4,7 @@ from mweb_crud.common.mweb_cb_helper import MWebCBHelper
 from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
 from mweb_crud.crud import RequestContext, ResponseMaker
 from mweb_crud.data_transfer import MWebDTO, MWebBaseDTO, MWebIDDTO, MWebDatedDTO
-from mweb_crud.helper import BeforeAfterSaveCallable
+from mweb_crud.helper import BeforeAfterSaveCallable, BeforeAfterDeleteCallable
 from mweb_orm import MWebBaseModel, and_, MWebIDModel
 from mweb_orm.query import MWebQueryProcessor
 
@@ -26,10 +26,10 @@ class MWebCRUDBase:
     def _add_delete_filter(self, query: MWebQueryProcessor, only: bool = False):
         return self._cb_helper.filter_deleted(model=self._model, query=query, only=only)
 
-    async def get_by_id(self, model_id: int, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None):
+    async def get_by_id(self, record_id: int, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None):
         if not query:
             query = self._model.query
-        query = query.where(and_(self._model.id == model_id))
+        query = query.where(and_(self._model.id == record_id))
         return await self.get_first(query=query, message=message, raise_error=raise_error)
 
     async def get_first(self, query: MWebQueryProcessor, raise_error: bool = True, message: str | None = None):
@@ -58,8 +58,20 @@ class MWebCRUDBase:
     async def save_existing(self):
         pass
 
-    async def soft_remove(self):
-        pass
+    async def soft_remove(self, record_id: int, query: MWebQueryProcessor | None = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):
+        existing_model = await self.get_by_id(record_id=record_id, query=query, raise_error=True)
+        if before_delete and callable(before_delete):
+            before_delete(record_id=record_id, existing_model=existing_model)
+
+        if existing_model and hasattr(existing_model, "isDeleted"):
+            existing_model.isDeleted = True
+            await existing_model.save()
+
+            if after_delete and callable(after_delete):
+                after_delete(record_id=record_id, existing_model=existing_model)
+
+            return True
+        return False
 
     def clone(self):
         pass

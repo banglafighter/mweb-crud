@@ -34,6 +34,7 @@ class MWebCRUDConfig:
     # Display Messages
     CREATE_SUCCESS_MSG: str = "Created successfully."
     DELETE_SUCCESS_MSG = "Deleted successfully."
+    FAILED_TO_DELETE_RECORD_MSG = "Failed to delete record."
     UPDATE_SUCCESS_MSG = "Updated successfully."
     INVALID_INPUT_DATA_MSG = "Invalid input data."
     FAILED_TO_SAVE_DATA_MSG = "Failed to save data."

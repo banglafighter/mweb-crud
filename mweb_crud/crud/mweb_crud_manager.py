@@ -4,7 +4,7 @@ from mweb_crud.common.mweb_crud_base import MWebCRUDBase
 from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
 from mweb_crud.crud import RequestContext, ResponseMaker
 from mweb_crud.data_transfer import MWebBaseDTO, MWebIDDTO, MWebDatedDTO, MWebDTO
-from mweb_crud.helper import BeforeAfterSaveCallable
+from mweb_crud.helper import BeforeAfterSaveCallable, BeforeAfterDeleteCallable
 from mweb_orm import MWebBaseModel
 from typing import Optional, Callable
 from mweb_orm.query import MWebQueryProcessor
@@ -73,16 +73,21 @@ class CRUDManager(MWebCRUDBase):
             after_validate: Optional[Callable[[dict], None]] = None):
         pass
 
-    async def details(self, model_id: int, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, query: MWebQueryProcessor | None = None, as_model: bool = False):
-        details = await self.get_by_id(model_id=model_id, query=query, raise_error=True)
+    async def details(self, record_id: int, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, query: MWebQueryProcessor | None = None, as_model: bool = False):
+        details = await self.get_by_id(record_id=record_id, query=query, raise_error=True)
         if as_model:
             return details
         return await self._response_maker.success_from_model(model=details, transformer=response)
 
-    async def delete(self, model_id: int, response_message: str = None, query: MWebQueryProcessor | None = None, before_delete: Optional[Callable[[int, MWebBaseModel], None]] = None, after_delete: Optional[Callable[[int, MWebBaseModel], None]] = None):
-        pass
+    async def delete(self, record_id: int, response_message: str = None, query: MWebQueryProcessor | None = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):
+        if not response_message:
+            response_message = MWebCRUDConfig.DELETE_SUCCESS_MSG
+        is_removed = await self.soft_remove(record_id=record_id, query=query, before_delete=before_delete, after_delete=after_delete)
+        if is_removed:
+            return await self._response_maker.success(content=response_message)
+        return await self._response_maker.error(message=MWebCRUDConfig.FAILED_TO_DELETE_RECORD_MSG)
 
-    async def hard_delete(self, model_id: int, query: MWebQueryProcessor | None = None):
+    async def hard_delete(self, record_id: int, query: MWebQueryProcessor | None = None):
         pass
 
     async def read_all(self, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, search_fields: list = None, sort_field: str | None = None, sort_order: str | None = None, sort: bool = True, query: MWebQueryProcessor | None = None, as_list: bool = False):

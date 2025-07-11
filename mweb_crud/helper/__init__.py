@@ -1,1 +1,1 @@
-from mweb_crud.helper.mweb_crud_callable import BeforeAfterSaveCallable
+from mweb_crud.helper.mweb_crud_callable import BeforeAfterSaveCallable, BeforeAfterDeleteCallable

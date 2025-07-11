@@ -1,3 +1,4 @@
+from mweb_crud.data_transfer import dto
 from mweb_crud.data_transfer.master_dto import MWebMasterDTO
 
 
@@ -6,12 +7,13 @@ class MWebBaseDTO(MWebMasterDTO):
 
 
 class MWebIDDTO(MWebMasterDTO):
-    pass
+    id = dto.Integer(dump_only=True)
 
 
 class MWebDatedDTO(MWebIDDTO):
-    pass
+    created = dto.DateTime(dump_only=True, format="%d %b %Y %I:%M:%S %p")
+    updated = dto.DateTime(dump_only=True, format="%d %b %Y %I:%M:%S %p")
 
 
 class MWebDTO(MWebDatedDTO):
-    pass
+    uuid = dto.String(dump_only=True)

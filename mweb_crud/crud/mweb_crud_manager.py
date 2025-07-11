@@ -79,14 +79,39 @@ class CRUDManager(MWebCRUDBase):
             return details
         return await self._response_maker.success_from_model(model=details, transformer=response)
 
-    async def delete(self, model_id: int, response_message: str = None, query=None, before_delete: Optional[Callable[[int, MWebBaseModel], None]] = None, after_delete: Optional[Callable[[int, MWebBaseModel], None]] = None):
+    async def delete(self, model_id: int, response_message: str = None, query: MWebQueryProcessor | None = None, before_delete: Optional[Callable[[int, MWebBaseModel], None]] = None, after_delete: Optional[Callable[[int, MWebBaseModel], None]] = None):
         pass
 
-    async def hard_delete(self, model_id: int, query=None):
+    async def hard_delete(self, model_id: int, query: MWebQueryProcessor | None = None):
         pass
 
-    async def read_all(self, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, search_fields: list = None, sort_field: str | None = None, sort_order: str | None = None, query=None, as_list: bool = False):
-        pass
+    async def read_all(self, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, search_fields: list = None, sort_field: str | None = None, sort_order: str | None = None, sort: bool = True, query: MWebQueryProcessor | None = None, as_list: bool = False):
+        result = await self.read_from_model(
+            search_fields=search_fields,
+            sort_field=sort_field,
+            sort_order=sort_order,
+            query=query,
+            paginate=False,
+            sort=sort,
+        )
 
-    async def paginated_read_all(self, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, search_fields: list = None, sort_field: str | None = None, sort_order: str | None = None, item_per_page: int | None = None, query=None, as_list: bool = False):
-        pass
+        if as_list:
+            return result
+
+        return await self._response_maker.success_from_model(model=result, transformer=response)
+
+    async def paginated_read_all(self, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, search_fields: list = None, sort_field: str | None = None, sort_order: str | None = None, sort: bool = True, item_per_page: int | None = None, query: MWebQueryProcessor | None = None, as_list: bool = False):
+        result = await self.read_from_model(
+            search_fields=search_fields,
+            sort_field=sort_field,
+            sort_order=sort_order,
+            query=query,
+            item_per_page=item_per_page,
+            paginate=True,
+            sort=sort,
+        )
+
+        if as_list:
+            return result
+
+        return await self._response_maker.success_from_model(model=result, transformer=response)

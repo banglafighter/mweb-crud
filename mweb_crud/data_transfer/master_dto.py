@@ -69,7 +69,7 @@ class MWebMasterDTO(Schema):
             raise MWebCRUDException(message=MWebCRUDMessage.VALIDATION_ERROR, details=errors)
         return None
 
-    def to_dict(self, model: MWebBaseModel | list[MWebBaseModel], many: bool = False) -> dict:
+    def to_dict(self, model: MWebBaseModel | list[MWebBaseModel], many: bool = False) -> dict | list:
         return self.dump(model, many=many)
 
     def clean_dict(self, data: dict) -> dict:

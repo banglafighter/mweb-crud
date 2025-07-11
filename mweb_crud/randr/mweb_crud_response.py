@@ -14,8 +14,9 @@ class MWebRESTResponseData(SDLize):
     error: dict = None
     pagination: Pagination = None
 
-    def set_pagination(self, data: list, pagination: Pagination):
-        self.data = data
+    def set_pagination(self, pagination: Pagination, data: list = None):
+        if data:
+            self.data = data
         pagination.items = None
         self.pagination = pagination
         return self

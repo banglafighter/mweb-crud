@@ -1,0 +1,22 @@
+
+
+== Test
+
+== /api/v1/school/create
+*Payload*
+```json
+{
+  "data": {
+    "description": "This school is for help student to learn technology",
+    "email": "banglafighter.com@gmail.com",
+    "establishedDate": "23/03/2020",
+    "isActive": true,
+    "lastInspectedAt": "01/03/2020 20:36:55",
+    "location": "Rangpur, Bangladesh",
+    "name": "Bangla Fighter School",
+    "numberOfStudent": 101,
+    "openingTime": "20:36:55",
+    "totalAssetAmount": 1000000
+  }
+}
+```

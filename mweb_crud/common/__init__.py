@@ -1,2 +1,1 @@
-from mweb_crud.common.mweb_crud_exeption import MWebCRUDException
-from mweb_crud.common.mweb_crud_message import MWebCRUDMessage
+from .mweb_crud_exeption import MWebCRUDException

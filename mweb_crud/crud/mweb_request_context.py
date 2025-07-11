@@ -2,7 +2,8 @@ import re
 from typing import Optional, Callable
 from mw_common import DataUtil
 from mweb import mweb_request
-from mweb_crud.common import MWebCRUDException, MWebCRUDMessage
+from mweb_crud.common import MWebCRUDException
+from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
 from mweb_crud.data_transfer import MWebBaseDTO, MWebDTO, MWebIDDTO, MWebDatedDTO
 
 
@@ -20,8 +21,9 @@ class RequestContext:
     async def get_data(self, validator: MWebBaseDTO | MWebDTO | MWebIDDTO | MWebDatedDTO  = None, clean: bool = False, many: bool = False, before_validate: Optional[Callable[[dict], None]] = None, after_validate: Optional[Callable[[dict], None]] = None):
         wrapped_data = await self.get_json_body()
         data = DataUtil.dict_value(data=wrapped_data, key="data", default=None)
+
         if not data:
-            raise MWebCRUDException(message=MWebCRUDMessage.INVALID_JSON_REQUEST_DATA)
+            raise MWebCRUDException(message=MWebCRUDConfig.INVALID_JSON_REQUEST_DATA_MSG)
 
         if not validator:
             return data
@@ -31,7 +33,7 @@ class RequestContext:
 
         errors = validator.validate(data=data, many=many)
         if errors and isinstance(errors, dict):
-            raise MWebCRUDException(message=MWebCRUDMessage.VALIDATION_ERROR, details=errors)
+            raise MWebCRUDException(message=MWebCRUDConfig.DATA_VALIDATION_ERROR_MSG, details=errors)
 
         if clean:
             data = validator.clean_dict(data=data)

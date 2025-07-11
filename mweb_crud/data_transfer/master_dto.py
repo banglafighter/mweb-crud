@@ -1,11 +1,13 @@
 from marshmallow import EXCLUDE, Schema, RAISE
 from sqlalchemy import inspect
-from mweb_crud.common import MWebCRUDException, MWebCRUDMessage
+from mweb_crud.common import MWebCRUDException
+from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
 from mweb_orm import MWebBaseModel, MWebModel, MWebDatedModel, MWebIDModel
 
 
 class MWebMasterDTO(Schema):
-    model_class: type[MWebBaseModel] = None
+    class Meta:
+        model: type[MWebBaseModel] = None
 
     def _get_required_fields(self, model):
         required_fields = []
@@ -18,12 +20,14 @@ class MWebMasterDTO(Schema):
 
     def _get_model(self, model_class: type[MWebBaseModel] = None):
         if not model_class:
-            model_class = self.model_class
+            model_class = self.Meta.model
+            if not issubclass(model_class, MWebBaseModel):
+                raise MWebCRUDException(message=f"The specified model is invalid.")
 
         if model_class and issubclass(model_class, MWebBaseModel):
             return model_class
         else:
-            raise MWebCRUDException(message=f" model_class not in property. model_class: type[MWebBaseModel].")
+            raise MWebCRUDException(message=f"Please add model class inside a Meta class")
 
     def _get_required_field_values(self, model, data: dict, raise_exception=True):
         required_fields = self._get_required_fields(model)
@@ -35,7 +39,7 @@ class MWebMasterDTO(Schema):
             else:
                 name_value_pairs[required_field] = data.get(required_field)
         if exception_messages and len(exception_messages) and raise_exception:
-            raise MWebCRUDException(message=MWebCRUDMessage.VALIDATION_ERROR, details=exception_messages)
+            raise MWebCRUDException(message=MWebCRUDConfig.DATA_VALIDATION_ERROR_MSG, details=exception_messages)
         return name_value_pairs
 
     def _get_model_instance(self, data: dict, model_class: type[MWebBaseModel] = None):
@@ -52,10 +56,10 @@ class MWebMasterDTO(Schema):
             return None
 
         if not model_instance:
-            model_instance = self._get_model_instance(data, model_class=model_class)
+            model_instance = self._get_model_instance(validated_dict, model_class=model_class)
 
         if model_instance:
-            for key, value in data.items():
+            for key, value in validated_dict.items():
                 if hasattr(model_instance, key) and key != "model_class":
                     setattr(model_instance, key, value)
 
@@ -66,7 +70,7 @@ class MWebMasterDTO(Schema):
         errors = super().validate(data, many=many, partial=partial)
         setattr(self, "unknown", RAISE)
         if errors and isinstance(errors, dict) and len(errors):
-            raise MWebCRUDException(message=MWebCRUDMessage.VALIDATION_ERROR, details=errors)
+            raise MWebCRUDException(message=MWebCRUDConfig.DATA_VALIDATION_ERROR_MSG, details=errors)
         return None
 
     def to_dict(self, model: MWebBaseModel | list[MWebBaseModel], many: bool = False) -> dict | list:

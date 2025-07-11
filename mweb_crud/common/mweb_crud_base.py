@@ -1,14 +1,16 @@
 from typing import Optional
+from mweb_crud.common import MWebCRUDException
 from mweb_crud.common.mweb_cb_helper import MWebCBHelper
+from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
 from mweb_crud.crud import RequestContext, ResponseMaker
 from mweb_crud.data_transfer import MWebDTO, MWebBaseDTO, MWebIDDTO, MWebDatedDTO
 from mweb_crud.helper import BeforeAfterSaveCallable
-from mweb_orm import MWebBaseModel
+from mweb_orm import MWebBaseModel, and_, MWebIDModel
 from mweb_orm.query import MWebQueryProcessor
 
 
 class MWebCRUDBase:
-    _model: type[MWebBaseModel] = None
+    _model: type[MWebBaseModel | MWebIDModel] = None
     _request_context: RequestContext = None
     _cb_helper: MWebCBHelper = None
     _response_maker: ResponseMaker = None
@@ -21,11 +23,25 @@ class MWebCRUDBase:
     async def check_unique(self):
         pass
 
+    def _add_delete_filter(self, query: MWebQueryProcessor):
+        return self._cb_helper.filter_deleted(model=self._model, query=query)
+
     async def get_by_id(self, model_id: int, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None):
-        pass
+        if not query:
+            query = self._model.query
+        query = query.where(and_(self._model.id == model_id))
+        return await self.get_first(query=query, message=message, raise_error=raise_error)
 
     async def get_first(self, query: MWebQueryProcessor, raise_error: bool = True, message: str | None = None):
-        pass
+        query = self._add_delete_filter(query=query)
+        result = await query.first()
+        if result:
+            return result
+        elif raise_error:
+            if not message:
+                message = MWebCRUDConfig.RECORD_NOT_FOUND_MSG
+            raise MWebCRUDException(message=message)
+        return None
 
     async def save(self, data: dict, request: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, before_save: Optional[BeforeAfterSaveCallable] = None, after_save: Optional[BeforeAfterSaveCallable] = None, model_instance: MWebBaseModel | None = None):
         model = request.to_model(data=data, model_instance=model_instance)

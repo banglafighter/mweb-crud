@@ -1,5 +1,6 @@
 from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
 from mweb_crud.crud import RequestContext
+from mweb_orm import MWebBaseModel, and_, MWebIDModel
 from mweb_orm.query import MWebQueryProcessor
 
 
@@ -16,8 +17,10 @@ class MWebCBHelper:
         pass
 
     @classmethod
-    def filter_deleted(cls, only: bool = False):
-        pass
+    def filter_deleted(cls, model: type[MWebBaseModel | MWebIDModel], query: MWebQueryProcessor, only: bool = False):
+        if hasattr(model, "isDeleted"):
+            query = query.where(and_(getattr(model, "isDeleted") == only))
+        return query
 
     @classmethod
     def set_sorting(cls, request_context: RequestContext, sort_field: str | None = None, sort_order: str | None = None):

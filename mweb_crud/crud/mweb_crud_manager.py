@@ -7,6 +7,7 @@ from mweb_crud.data_transfer import MWebBaseDTO, MWebIDDTO, MWebDatedDTO, MWebDT
 from mweb_crud.helper import BeforeAfterSaveCallable
 from mweb_orm import MWebBaseModel
 from typing import Optional, Callable
+from mweb_orm.query import MWebQueryProcessor
 
 
 class CRUDManager(MWebCRUDBase):
@@ -72,8 +73,11 @@ class CRUDManager(MWebCRUDBase):
             after_validate: Optional[Callable[[dict], None]] = None):
         pass
 
-    async def details(self, model_id: int, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, query=None, as_model: bool = False):
-        pass
+    async def details(self, model_id: int, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, query: MWebQueryProcessor | None = None, as_model: bool = False):
+        details = await self.get_by_id(model_id=model_id, query=query, raise_error=True)
+        if as_model:
+            return details
+        return await self._response_maker.success_from_model(model=details, transformer=response)
 
     async def delete(self, model_id: int, response_message: str = None, query=None, before_delete: Optional[Callable[[int, MWebBaseModel], None]] = None, after_delete: Optional[Callable[[int, MWebBaseModel], None]] = None):
         pass

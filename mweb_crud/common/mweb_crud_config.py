@@ -41,4 +41,5 @@ class MWebCRUDConfig:
 
     INVALID_JSON_REQUEST_DATA_MSG = "Invalid JSON request data."
     DATA_VALIDATION_ERROR_MSG = "Data validation error!"
+    RECORD_NOT_FOUND_MSG = "Record not found."
 

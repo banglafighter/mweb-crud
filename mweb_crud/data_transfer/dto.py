@@ -1,7 +1,7 @@
 import enum
 import typing
 from marshmallow import fields
-from quart.datastructures import FileStorage
+from mweb import FileStorage
 from mweb_crud.data_transfer.df_helper import validate_enum_value, BaseEnum
 
 
@@ -80,6 +80,7 @@ class File(fields.String):
     allowed_extensions: list = None
     is_multiple: bool = False
     is_string_name: bool = False
+    is_uploaded: bool = False
     save_prefix: str = None
 
     default_error_messages = {
@@ -113,7 +114,6 @@ class File(fields.String):
                     raise self.make_error("invalid")
             return value
 
-        if not isinstance(value, FileStorage) and not self.is_string_name:
+        if not isinstance(value, FileStorage) and not self.is_string_name and not self.is_uploaded:
             raise self.make_error("invalid")
         return value
-

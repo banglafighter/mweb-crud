@@ -1,10 +1,11 @@
-from mw_common import DataUtil
+from mw_common import DataUtil, MwUtil
 from mweb_crud.common import MWebCRUDException
 from mweb_crud.common.mweb_cb_helper import MWebCBHelper
 from mweb_crud.common.mweb_crud_base import MWebCRUDBase
 from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
 from mweb_crud.crud import RequestContext, ResponseMaker
 from mweb_crud.data_transfer import MWebBaseDTO, MWebIDDTO, MWebDatedDTO, MWebDTO
+from mweb_crud.file_upload import MWebCRUDFile, UploadCustomizer
 from mweb_crud.helper import BeforeAfterSaveCallable, BeforeAfterDeleteCallable
 from mweb_orm import MWebBaseModel
 from typing import Optional, Callable
@@ -12,12 +13,14 @@ from mweb_orm.query import MWebQueryProcessor
 
 
 class CRUDManager(MWebCRUDBase):
+    _mweb_crud_file: MWebCRUDFile = None
 
     def __init__(self, model: type[MWebBaseModel]):
         self._request_context = RequestContext()
         self._response_maker = ResponseMaker()
         self._model = model
         self._cb_helper = MWebCBHelper()
+        self._mweb_crud_file = MWebCRUDFile()
 
     @property
     def request(self) -> RequestContext:
@@ -42,14 +45,22 @@ class CRUDManager(MWebCRUDBase):
             data: dict = None,
             before_save: Optional[BeforeAfterSaveCallable] = None,
             after_save: Optional[BeforeAfterSaveCallable] = None,
-            as_model: bool = False, allow_files: bool = False,
+            as_model: bool = False,
+            allow_files: bool = False,
+            upload_customizer: UploadCustomizer | None = None,
+            upload_path: str | None = None,
             before_validate: Optional[Callable[[dict], None]] = None,
             after_validate: Optional[Callable[[dict], None]] = None):
 
-        if not data:
-            data = await self._request_context.get_data(validator=request, before_validate=before_validate, after_validate=after_validate)
+        if data is None:
+            data = await self._request_context.get_data(validator=request, before_validate=before_validate, after_validate=after_validate, read_from="form" if allow_files else "json")
 
-        saved_model = await self.save(data=data, request=request, before_save=before_save, after_save=after_save)
+        uuid : str | None = None
+        if allow_files:
+            uuid = MwUtil.uuid()
+            data = await self._mweb_crud_file.process_and_upload_files(request=request, upload_path=upload_path, upload_customizer=upload_customizer, data=data, uuid=uuid)
+
+        saved_model = await self.save(data=data, request=request, before_save=before_save, after_save=after_save, uuid=uuid)
         if as_model:
             return saved_model
 
@@ -69,17 +80,27 @@ class CRUDManager(MWebCRUDBase):
             data: dict = None,
             before_save: Optional[BeforeAfterSaveCallable] = None,
             after_save: Optional[BeforeAfterSaveCallable] = None,
-            as_model: bool = False, allow_files: bool = False,
+            as_model: bool = False,
+            allow_files: bool = False,
+            upload_customizer: UploadCustomizer | None = None,
+            upload_path: str | None = None,
             model_instance: MWebBaseModel | None = None,
             before_validate: Optional[Callable[[dict], None]] = None,
             after_validate: Optional[Callable[[dict], None]] = None):
 
-        if not data:
-            data = await self._request_context.get_data(validator=request, before_validate=before_validate, after_validate=after_validate)
+        if data is None:
+            data = await self._request_context.get_data(validator=request, before_validate=before_validate, after_validate=after_validate, read_from="form" if allow_files else "json")
 
         record_id = DataUtil.dict_value(data=data, key="id")
         if not record_id:
             self.raise_error(message=MWebCRUDConfig.ID_REQUIRED_MSG)
+
+        if allow_files:
+            if not model_instance:
+                model_instance = await self.get_by_id(record_id=record_id, raise_error=True)
+            uuid = model_instance.uuid
+            data = await self._mweb_crud_file.process_and_upload_files(request=request, upload_path=upload_path, upload_customizer=upload_customizer, data=data, uuid=uuid)
+
 
         updated_model = await self.save_existing(record_id=record_id, data=data, request=request, before_save=before_save, after_save=after_save, model_instance=model_instance)
         if as_model:

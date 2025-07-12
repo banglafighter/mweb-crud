@@ -1,5 +1,5 @@
 import re
-from typing import Optional, Callable
+from typing import Optional, Callable, Literal
 from mw_common import DataUtil
 from mweb import mweb_request
 from mweb_crud.common import MWebCRUDException
@@ -18,11 +18,16 @@ class RequestContext:
         except Exception as e:
             raise MWebCRUDException(message=str(e))
 
-    async def get_data(self, validator: MWebBaseDTO | MWebDTO | MWebIDDTO | MWebDatedDTO  = None, clean: bool = False, many: bool = False, before_validate: Optional[Callable[[dict], None]] = None, after_validate: Optional[Callable[[dict], None]] = None):
-        wrapped_data = await self.get_json_body()
-        data = DataUtil.dict_value(data=wrapped_data, key="data", default=None)
+    async def get_data(self, validator: MWebBaseDTO | MWebDTO | MWebIDDTO | MWebDatedDTO  = None, clean: bool = False, many: bool = False, read_from: Literal["json", "form"] = "json", before_validate: Optional[Callable[[dict], None]] = None, after_validate: Optional[Callable[[dict], None]] = None):
 
-        if not data:
+        data: dict | None = None
+        if read_from == "json":
+            wrapped_data = await self.get_json_body()
+            data = DataUtil.dict_value(data=wrapped_data, key="data", default=None)
+        elif read_from == "form":
+            data = await self.form_and_file_to_dict()
+
+        if data is None:
             raise MWebCRUDException(message=MWebCRUDConfig.INVALID_JSON_REQUEST_DATA_MSG)
 
         if not validator:
@@ -43,7 +48,7 @@ class RequestContext:
 
         return data
 
-    async def get_form_data(self, default=None):
+    async def form_data(self, default=None):
         try:
             form_data = await mweb_request.form
             if form_data is not None:
@@ -52,7 +57,30 @@ class RequestContext:
         except Exception as e:
             raise MWebCRUDException(message=str(e))
 
-    async def get_uploaded_files(self, default=None):
+    def _convert_form_value(self, value):
+        if value in ("null", "None", ""):
+            return None
+        return value
+
+    def _convert_form_to_dict(self, form_data, default=None):
+        if form_data is None:
+            return default
+
+        requested_data = form_data.to_dict(flat=False)
+        response = {}
+        for data in requested_data:
+            if len(requested_data[data]) == 1:
+                response[data] = self._convert_form_value(requested_data[data][0])
+            else:
+                response[data] = self._convert_form_value(requested_data[data])
+
+        return response
+
+    async def form_to_dict(self, default=None):
+        form_data = await self.form_data()
+        return self._convert_form_to_dict(form_data, default)
+
+    async def uploaded_files(self, default=None):
         try:
             files = await mweb_request.files
             if files is not None:
@@ -60,6 +88,18 @@ class RequestContext:
             return default
         except Exception as e:
             raise MWebCRUDException(message=str(e))
+
+    async def uploaded_file_to_dict(self, default=None):
+        files_data = await self.uploaded_files()
+        return self._convert_form_to_dict(files_data, default)
+
+    async def form_and_file_to_dict(self, default=None):
+        form_data = await self.form_to_dict(default={})
+        file_data = await self.uploaded_file_to_dict(default={})
+        form_data.update(file_data)
+        if form_data:
+            return form_data
+        return default
 
     def get_header(self, name: str, default=None):
         return mweb_request.headers.get(name, default)

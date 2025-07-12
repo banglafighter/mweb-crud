@@ -5,7 +5,7 @@ from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
 from mweb_crud.crud import RequestContext, ResponseMaker
 from mweb_crud.data_transfer import MWebDTO, MWebBaseDTO, MWebIDDTO, MWebDatedDTO
 from mweb_crud.helper import BeforeAfterSaveCallable, BeforeAfterDeleteCallable
-from mweb_orm import MWebBaseModel, and_, MWebIDModel
+from mweb_orm import MWebBaseModel, and_, MWebIDModel, MWebModel
 from mweb_orm.query import MWebQueryProcessor
 
 
@@ -23,7 +23,7 @@ class MWebCRUDBase:
     def _add_delete_filter(self, query: MWebQueryProcessor, only: bool = False):
         return self._cb_helper.filter_deleted(model=self._model, query=query, only=only)
 
-    async def get_by_id(self, record_id: int, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None) -> MWebBaseModel | None:
+    async def get_by_id(self, record_id: int, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None) -> MWebBaseModel | MWebModel | None:
         if not query:
             query = self._model.query
         query = query.where(and_(self._model.id == record_id))
@@ -40,8 +40,10 @@ class MWebCRUDBase:
             raise MWebCRUDException(message=message)
         return None
 
-    async def save(self, data: dict, request: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, before_save: Optional[BeforeAfterSaveCallable] = None, after_save: Optional[BeforeAfterSaveCallable] = None, model_instance: MWebBaseModel | None = None):
+    async def save(self, data: dict, request: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, before_save: Optional[BeforeAfterSaveCallable] = None, after_save: Optional[BeforeAfterSaveCallable] = None, model_instance: MWebBaseModel | None = None, uuid: str | None = None) -> MWebBaseModel | None:
         model = request.to_model(data=data, model_instance=model_instance)
+        if uuid:
+            model.uuid = uuid
 
         if before_save and callable(before_save):
             before_save(data=data, model=model)

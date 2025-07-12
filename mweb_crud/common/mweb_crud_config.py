@@ -24,10 +24,6 @@ class MWebCRUDConfig:
     ENABLED_JWT_AUTH: bool = True
 
 
-    # File Upload
-    FILE_SIZE_NOT_MATCH: str = "File size is bigger than allowed"
-    INVALID_FILE_EXTENSION: str = "Invalid uploaded file"
-    INVALID_FILE_UPLOAD_PATH: str = "Invalid upload path"
 
     # Display Messages
     CREATE_SUCCESS_MSG: str = "Created successfully"
@@ -46,4 +42,7 @@ class MWebCRUDConfig:
     DUPLICATE_ENTRY_ERROR_MSG = "Duplicate entry detected"
 
     UNKNOWN_ERROR_MSG: str = "Unknown Error Occurred!"
+    FILE_SIZE_NOT_MATCH_MSG = "File size exceeds the allowed limit"
+    INVALID_FILE_EXTENSION_MSG = "Invalid file type uploaded"
+    INVALID_FILE_UPLOAD_PATH_MSG = "Invalid file upload path"
 

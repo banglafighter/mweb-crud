@@ -1,3 +1,4 @@
+from mw_common import DataUtil
 from mweb_crud.common import MWebCRUDException
 from mweb_crud.common.mweb_cb_helper import MWebCBHelper
 from mweb_crud.common.mweb_crud_base import MWebCRUDBase
@@ -53,7 +54,7 @@ class CRUDManager(MWebCRUDBase):
             return saved_model
 
         if not saved_model.is_saved():
-            return self._response_maker.error(message=MWebCRUDConfig.FAILED_TO_SAVE_DATA_MSG)
+            return await self._response_maker.error(message=MWebCRUDConfig.FAILED_TO_SAVE_DATA_MSG)
 
         if not response_message:
             response_message = MWebCRUDConfig.CREATE_SUCCESS_MSG
@@ -69,9 +70,27 @@ class CRUDManager(MWebCRUDBase):
             before_save: Optional[BeforeAfterSaveCallable] = None,
             after_save: Optional[BeforeAfterSaveCallable] = None,
             as_model: bool = False, allow_files: bool = False,
+            model_instance: MWebBaseModel | None = None,
             before_validate: Optional[Callable[[dict], None]] = None,
             after_validate: Optional[Callable[[dict], None]] = None):
-        pass
+
+        if not data:
+            data = await self._request_context.get_data(validator=request, before_validate=before_validate, after_validate=after_validate)
+
+        record_id = DataUtil.dict_value(data=data, key="id")
+        if not record_id:
+            self.raise_error(message=MWebCRUDConfig.ID_REQUIRED_MSG)
+
+        updated_model = await self.save_existing(record_id=record_id, data=data, request=request, before_save=before_save, after_save=after_save, model_instance=model_instance)
+        if as_model:
+            return updated_model
+
+        if not updated_model.is_saved():
+            return await self._response_maker.error(message=MWebCRUDConfig.FAILED_TO_UPDATE_DATA_MSG)
+
+        if not response_message:
+            response_message = MWebCRUDConfig.UPDATE_SUCCESS_MSG
+        return await self.make_success_response(model=updated_model, response_message=response_message, response=response)
 
     async def details(self, record_id: int, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, query: MWebQueryProcessor | None = None, as_model: bool = False):
         details = await self.get_by_id(record_id=record_id, query=query, raise_error=True)
@@ -86,9 +105,6 @@ class CRUDManager(MWebCRUDBase):
         if is_removed:
             return await self._response_maker.success(content=response_message)
         return await self._response_maker.error(message=MWebCRUDConfig.FAILED_TO_DELETE_RECORD_MSG)
-
-    async def hard_delete(self, record_id: int, query: MWebQueryProcessor | None = None):
-        pass
 
     async def read_all(self, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, search_fields: list = None, sort_field: str | None = None, sort_order: str | None = None, sort: bool = True, query: MWebQueryProcessor | None = None, as_list: bool = False):
         result = await self.read_from_model(
@@ -120,3 +136,8 @@ class CRUDManager(MWebCRUDBase):
             return result
 
         return await self._response_maker.success_from_model(model=result, transformer=response)
+
+    async def hard_delete(self, record_id: int, query: MWebQueryProcessor | None = None):
+        existing_model = await self.get_by_id(record_id=record_id, query=query, raise_error=True)
+        await existing_model.delete()
+        return await self._response_maker.success(content=MWebCRUDConfig.DELETE_SUCCESS_MSG)

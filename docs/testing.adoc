@@ -20,3 +20,23 @@
   }
 }
 ```
+
+== /api/v1/school/create
+*Payload*
+```json
+{
+ "data": {
+    "description": "Updated Description",
+    "email": "banglafighter.com@gmail.com",
+    "establishedDate": "23/12/2020",
+    "id": 5,
+    "isActive": true,
+    "lastInspectedAt": "01/12/2020 20:36:55",
+    "location": "Rangpur, Bangladesh",
+    "name": "Bangla Fighter School",
+    "numberOfStudent": 101,
+    "openingTime": "20:36:55",
+    "totalAssetAmount": 1000000
+  }
+}
+```

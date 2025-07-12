@@ -20,19 +20,16 @@ class MWebCRUDBase:
             return await self._response_maker.success_from_model(model=model, transformer=response, message=response_message)
         return await self._response_maker.success(content=response_message)
 
-    async def check_unique(self):
-        pass
-
     def _add_delete_filter(self, query: MWebQueryProcessor, only: bool = False):
         return self._cb_helper.filter_deleted(model=self._model, query=query, only=only)
 
-    async def get_by_id(self, record_id: int, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None):
+    async def get_by_id(self, record_id: int, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None) -> MWebBaseModel | None:
         if not query:
             query = self._model.query
         query = query.where(and_(self._model.id == record_id))
         return await self.get_first(query=query, message=message, raise_error=raise_error)
 
-    async def get_first(self, query: MWebQueryProcessor, raise_error: bool = True, message: str | None = None):
+    async def get_first(self, query: MWebQueryProcessor, raise_error: bool = True, message: str | None = None) -> MWebBaseModel | None:
         query = self._add_delete_filter(query=query)
         result = await query.first()
         if result:
@@ -55,8 +52,10 @@ class MWebCRUDBase:
 
         return model
 
-    async def save_existing(self):
-        pass
+    async def save_existing(self, record_id: int, data: dict, request: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, before_save: Optional[BeforeAfterSaveCallable] = None, after_save: Optional[BeforeAfterSaveCallable] = None, model_instance: MWebBaseModel | None = None):
+        if not model_instance:
+            model_instance = await self.get_by_id(record_id=record_id, raise_error=True)
+        return await self.save(data=data, request=request, before_save=before_save, after_save=after_save, model_instance=model_instance)
 
     async def soft_remove(self, record_id: int, query: MWebQueryProcessor | None = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):
         existing_model = await self.get_by_id(record_id=record_id, query=query, raise_error=True)
@@ -72,9 +71,6 @@ class MWebCRUDBase:
 
             return True
         return False
-
-    def clone(self):
-        pass
 
     async def read_from_model(
             self,
@@ -125,3 +121,22 @@ class MWebCRUDBase:
             return await query.paginate(item_per_page=item_per_page, page=page)
 
         return await query.read_all()
+
+    async def check_unique(self, field_name: str, value, query: MWebQueryProcessor | None = None, not_record_id: int = None, raise_error: bool = True, message: str | None = None):
+        if not query:
+            query = self._model.query
+        query = query.where(and_(getattr(self._model, field_name) == value))
+
+        if not not_record_id:
+            query =  query.where(and_(self._model.id != not_record_id))
+
+        result = await query.first()
+
+        if message is None:
+            message = MWebCRUDConfig.VALUE_ALREADY_EXISTS_MSG
+
+        if result and raise_error:
+            raise MWebCRUDException(message=MWebCRUDConfig.DUPLICATE_ENTRY_ERROR_MSG, details={field_name: message})
+
+    def clone(self):
+        pass

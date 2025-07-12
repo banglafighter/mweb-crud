@@ -23,8 +23,6 @@ class MWebCRUDConfig:
 
     ENABLED_JWT_AUTH: bool = True
 
-    # Messages
-    UNKNOWN_ERROR: str = "Unknown Error Occurred!"
 
     # File Upload
     FILE_SIZE_NOT_MATCH: str = "File size is bigger than allowed"
@@ -32,15 +30,20 @@ class MWebCRUDConfig:
     INVALID_FILE_UPLOAD_PATH: str = "Invalid upload path"
 
     # Display Messages
-    CREATE_SUCCESS_MSG: str = "Created successfully."
-    DELETE_SUCCESS_MSG = "Deleted successfully."
-    FAILED_TO_DELETE_RECORD_MSG = "Failed to delete record."
-    UPDATE_SUCCESS_MSG = "Updated successfully."
-    INVALID_INPUT_DATA_MSG = "Invalid input data."
-    FAILED_TO_SAVE_DATA_MSG = "Failed to save data."
-    FAILED_TO_UPDATE_DATA_MSG = "Failed to update data."
+    CREATE_SUCCESS_MSG: str = "Created successfully"
+    DELETE_SUCCESS_MSG = "Deleted successfully"
+    FAILED_TO_DELETE_RECORD_MSG = "Failed to delete record"
+    UPDATE_SUCCESS_MSG = "Updated successfully"
+    INVALID_INPUT_DATA_MSG = "Invalid input data"
+    FAILED_TO_SAVE_DATA_MSG = "Failed to save data"
+    FAILED_TO_UPDATE_DATA_MSG = "Failed to update data"
 
-    INVALID_JSON_REQUEST_DATA_MSG = "Invalid JSON request data."
+    INVALID_JSON_REQUEST_DATA_MSG = "Invalid JSON request data"
     DATA_VALIDATION_ERROR_MSG = "Data validation error!"
-    RECORD_NOT_FOUND_MSG = "Record not found."
+    RECORD_NOT_FOUND_MSG = "Record not found"
+    ID_REQUIRED_MSG = "The ID field is required"
+    VALUE_ALREADY_EXISTS_MSG = "This value already exists"
+    DUPLICATE_ENTRY_ERROR_MSG = "Duplicate entry detected"
+
+    UNKNOWN_ERROR_MSG: str = "Unknown Error Occurred!"
 

@@ -1,10 +1,21 @@
 import re
+from dataclasses import dataclass
 from typing import Optional, Callable, Literal
 from mw_common import DataUtil
 from mweb import mweb_request
 from mweb_crud.common import MWebCRUDException
 from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
 from mweb_crud.data_transfer import MWebBaseDTO, MWebDTO, MWebIDDTO, MWebDatedDTO
+
+
+@dataclass
+class MWebRequestURLInfo:
+    relativeURL: str = None
+    relativeURLWithParam: str = None
+    hostWithPort: str = None
+    method: str = None
+    baseURL: str = None
+    urlRule: str = None
 
 
 class RequestContext:
@@ -135,3 +146,15 @@ class RequestContext:
                 return value[0]
             return value
         return default
+
+    def extract_request_url_info(self) -> MWebRequestURLInfo:
+        url_info = MWebRequestURLInfo()
+        if mweb_request and mweb_request.url:
+            if mweb_request.path:
+                url_info.relativeURL = str(mweb_request.path)
+            url_info.relativeURLWithParam = str(mweb_request.full_path)
+            url_info.hostWithPort = str(mweb_request.host)
+            url_info.method = str(mweb_request.method)
+            url_info.urlRule = str(mweb_request.url_rule)
+            url_info.baseURL = str(mweb_request.host_url).strip("/")
+        return url_info

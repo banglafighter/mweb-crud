@@ -6,6 +6,8 @@ from .base_dto import (
     MWebIDDTO
 )
 
+from .df_helper import BaseEnum
+
 from marshmallow import (
     validates_schema as marsh_validates_schema,
     pre_dump as marsh_pre_dump,

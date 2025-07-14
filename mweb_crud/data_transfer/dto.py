@@ -53,7 +53,7 @@ class List(fields.List):
     pass
 
 
-class Nested(fields.Field):
+class Nested(fields.Nested):
     pass
 
 

@@ -16,11 +16,11 @@ from marshmallow import (
     pre_load as marsh_pre_load,
 )
 
-validates_schema = marsh_validates_schema,
-pre_dump = marsh_pre_dump,
-post_load = marsh_post_load,
-post_dump = marsh_post_dump,
-pre_load = marsh_pre_load,
+validates_schema = marsh_validates_schema
+pre_dump = marsh_pre_dump
+post_load = marsh_post_load
+post_dump = marsh_post_dump
+pre_load = marsh_pre_load
 
 __all__ = [
     "MWebBaseDTO",

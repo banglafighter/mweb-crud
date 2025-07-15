@@ -49,7 +49,7 @@ class MWebMasterDTO(Schema):
             return model(**name_value_pairs)
         return None
 
-    def to_model(self, data: dict, model_class: type[MWebBaseModel] = None, model_instance: MWebModel | MWebDatedModel | MWebIDModel | MWebBaseModel = None) -> MWebBaseModel | None:
+    def to_model(self, data: dict, model_class: type[MWebBaseModel] = None, model_instance: MWebModel | MWebDatedModel | MWebIDModel | MWebBaseModel = None) -> MWebBaseModel | MWebModel | MWebDatedModel | MWebIDModel | None:
         self.validate(data=data, many=False, partial=False)
         validated_dict = self.load(data=data, unknown=EXCLUDE)
         if not validated_dict or not isinstance(validated_dict, dict):
@@ -65,16 +65,17 @@ class MWebMasterDTO(Schema):
 
         return model_instance
 
-    def validate(self, data: dict | list, many: bool = False, partial: bool = False) -> dict | None:
+    def validate(self, data: dict | list, many: bool = False, partial: bool = False) -> dict | list:
         setattr(self, "unknown", EXCLUDE)
         errors = super().validate(data, many=many, partial=partial)
         setattr(self, "unknown", RAISE)
         if errors and isinstance(errors, dict) and len(errors):
             raise MWebCRUDException(message=MWebCRUDConfig.DATA_VALIDATION_ERROR_MSG, details=errors)
-        return None
+        return data
 
     def to_dict(self, model: MWebBaseModel | list[MWebBaseModel], many: bool = False) -> dict | list:
         return self.dump(model, many=many)
 
-    def clean_dict(self, data: dict) -> dict:
+    def clean_dict(self, data: dict | list, many: bool = False, partial: bool = False) -> dict | list:
+        self.validate(data=data, many=many, partial=partial)
         return self.load(data=data, unknown=EXCLUDE)

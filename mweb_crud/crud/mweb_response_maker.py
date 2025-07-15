@@ -28,7 +28,7 @@ class ResponseMaker:
 
 
     @classmethod
-    async def success_from_model(cls, model: MWebModel | MWebBaseModel | list[MWebBaseModel] | MWebIDModel | MWebDatedModel | Pagination, transformer: MWebDTO | MWebBaseDTO | MWebDatedDTO | MWebIDDTO, message: str = None, code: int = None, http_code: int = None, headers: dict = None, as_transform: bool = False):
+    async def success_from_model(cls, model: MWebModel | MWebBaseModel | list[MWebBaseModel] | MWebIDModel | MWebDatedModel | Pagination, transformer: MWebDTO | MWebBaseDTO | MWebDatedDTO | MWebIDDTO, message: str = None, code: int = None, http_code: int = None, headers: dict = None, as_transform: bool = False, as_dict: bool = False):
         if not code:
             code = MWebRESTResponseCode.success
 
@@ -51,7 +51,10 @@ class ResponseMaker:
         if as_transform:
             return transformed_response
         response.data = transformed_response
-        return await MWebResponse.make_response(content=response.to_dict(), headers=headers, http_code=http_code)
+        content = response.to_dict()
+        if as_dict:
+            return content
+        return await MWebResponse.make_response(content=content, headers=headers, http_code=http_code)
 
 
 

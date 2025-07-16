@@ -1,21 +1,35 @@
 from marshmallow import EXCLUDE, Schema, RAISE
 from sqlalchemy import inspect
+from mw_common import DataUtil
 from mweb_crud.common import MWebCRUDException
 from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
 from mweb_orm import MWebBaseModel, MWebModel, MWebDatedModel, MWebIDModel
+from dataclasses import fields
 
 
 class MWebMasterDTO(Schema):
     class Meta:
         model: type[MWebBaseModel] = None
 
+    def _get_snake_camel_name_map(self, model):
+        mapping: dict = {}
+        for field in fields(model):
+            if hasattr(model, field.name):
+                property_definition = getattr(model, field.name)
+                if hasattr(property_definition, 'name') and hasattr(property_definition, "key"):
+                    mapping[property_definition.name] = property_definition.key
+        return mapping
+
     def _get_required_fields(self, model):
         required_fields = []
         if model:
+            snake_camel_name_mapping: dict = self._get_snake_camel_name_map(model)
             mapper = inspect(model)
             for column in mapper.columns:
                 if not column.nullable and not column.primary_key and column.default is None and column.server_default is None:
-                    required_fields.append(column.key)
+                    camel_case_name = DataUtil.dict_value(snake_camel_name_mapping, column.name)
+                    if camel_case_name is not None:
+                        required_fields.append(camel_case_name)
         return required_fields
 
     def _get_model(self, model_class: type[MWebBaseModel] = None):
@@ -65,13 +79,13 @@ class MWebMasterDTO(Schema):
 
         return model_instance
 
-    def validate(self, data: dict | list, many: bool = False, partial: bool = False) -> dict | list:
+    def validate(self, data: dict | list, many: bool = False, partial: bool = False) -> dict | None:
         setattr(self, "unknown", EXCLUDE)
         errors = super().validate(data, many=many, partial=partial)
         setattr(self, "unknown", RAISE)
         if errors and isinstance(errors, dict) and len(errors):
             raise MWebCRUDException(message=MWebCRUDConfig.DATA_VALIDATION_ERROR_MSG, details=errors)
-        return data
+        return None
 
     def to_dict(self, model: MWebBaseModel | list[MWebBaseModel], many: bool = False) -> dict | list:
         return self.dump(model, many=many)

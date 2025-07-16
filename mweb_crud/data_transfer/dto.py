@@ -73,7 +73,7 @@ class Enum(fields.String):
         if hasattr(self.enumType, 'is_mw_enum'):
             validate_enum_value(self.enumType.values(), data[attr], attr)
         name = self.enumType.value_to_key(data[attr])
-        return self.enumType[name]
+        return name
 
 class File(fields.String):
     max_size_kb: int = None

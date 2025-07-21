@@ -46,11 +46,11 @@ class MWebCRUDBase:
             model.uuid = uuid
 
         if before_save and callable(before_save):
-            before_save(data=data, model=model)
+            await before_save(data=data, model=model)
         await model.save()
 
         if after_save and callable(after_save):
-            after_save(data=data, model=model)
+            await after_save(data=data, model=model)
 
         return model
 
@@ -62,14 +62,14 @@ class MWebCRUDBase:
     async def soft_remove(self, record_id: int, query: MWebQueryProcessor | None = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):
         existing_model = await self.get_by_id(record_id=record_id, query=query, raise_error=True)
         if before_delete and callable(before_delete):
-            before_delete(record_id=record_id, existing_model=existing_model)
+            await before_delete(record_id=record_id, existing_model=existing_model)
 
         if existing_model and hasattr(existing_model, "isDeleted"):
             existing_model.isDeleted = True
             await existing_model.save()
 
             if after_delete and callable(after_delete):
-                after_delete(record_id=record_id, existing_model=existing_model)
+                await after_delete(record_id=record_id, existing_model=existing_model)
 
             return True
         return False

@@ -52,11 +52,12 @@ class MWebCRUDFile:
         for field_name in validator.fields:
             field = validator.fields[field_name]
             if isinstance(field, File):
-                file_storage: FileStorage = data[field_name]
-                if not self.is_valid_size(file_storage=file_storage, field=field):
-                    errors[field_name] = MWebCRUDConfig.FILE_SIZE_NOT_MATCH_MSG
-                elif not self.is_allowed_file_extension(file_storage=file_storage, field=field):
-                    errors[field_name] = MWebCRUDConfig.INVALID_FILE_EXTENSION_MSG
+                file_storage: FileStorage = DataUtil.dict_value(data, field_name)
+                if file_storage:
+                    if not self.is_valid_size(file_storage=file_storage, field=field):
+                        errors[field_name] = MWebCRUDConfig.FILE_SIZE_NOT_MATCH_MSG
+                    elif not self.is_allowed_file_extension(file_storage=file_storage, field=field):
+                        errors[field_name] = MWebCRUDConfig.INVALID_FILE_EXTENSION_MSG
         if errors and len(errors):
             raise MWebCRUDException(message=MWebCRUDConfig.DATA_VALIDATION_ERROR_MSG, details=errors)
         return data

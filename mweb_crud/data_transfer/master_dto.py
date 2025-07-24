@@ -63,11 +63,19 @@ class MWebMasterDTO(Schema):
             return model(**name_value_pairs)
         return None
 
-    def to_model(self, data: dict, model_class: type[MWebBaseModel] = None, model_instance: MWebModel | MWebDatedModel | MWebIDModel | MWebBaseModel = None) -> MWebBaseModel | MWebModel | MWebDatedModel | MWebIDModel | None:
+    def ignore_fields(self, data: dict, ignore_keys: list[str]) -> dict:
+        if not ignore_keys or not data:
+            return data
+        return {key: value for key, value in data.items() if key not in ignore_keys}
+
+    def to_model(self, data: dict, model_class: type[MWebBaseModel] = None, model_instance: MWebModel | MWebDatedModel | MWebIDModel | MWebBaseModel = None, ignore_keys: list[str] | None = None) -> MWebBaseModel | MWebModel | MWebDatedModel | MWebIDModel | None:
         self.validate(data=data, many=False, partial=False)
         validated_dict = self.load(data=data, unknown=EXCLUDE)
         if not validated_dict or not isinstance(validated_dict, dict):
             return None
+
+        if ignore_keys:
+            validated_dict = self.ignore_fields(data=validated_dict, ignore_keys=ignore_keys)
 
         if not model_instance:
             model_instance = self._get_model_instance(validated_dict, model_class=model_class)

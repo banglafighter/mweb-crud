@@ -49,6 +49,7 @@ class CRUDManager(MWebCRUDBase):
             allow_files: bool = False,
             upload_customizer: UploadCustomizer | None = None,
             upload_path: str | None = None,
+            ignore_keys: list[str] | None = None,
             before_validate: Optional[Callable[[dict], None]] = None,
             after_validate: Optional[Callable[[dict], None]] = None):
 
@@ -60,7 +61,7 @@ class CRUDManager(MWebCRUDBase):
             uuid = MwUtil.uuid()
             data = await self._mweb_crud_file.process_and_upload_files(request=request, upload_path=upload_path, upload_customizer=upload_customizer, data=data, uuid=uuid)
 
-        saved_model = await self.save(data=data, request=request, before_save=before_save, after_save=after_save, uuid=uuid)
+        saved_model = await self.save(data=data, request=request, before_save=before_save, after_save=after_save, uuid=uuid, ignore_keys=ignore_keys)
         if as_model:
             return saved_model
 
@@ -85,6 +86,7 @@ class CRUDManager(MWebCRUDBase):
             upload_customizer: UploadCustomizer | None = None,
             upload_path: str | None = None,
             model_instance: MWebBaseModel | None = None,
+            ignore_keys: list[str] | None = None,
             before_validate: Optional[Callable[[dict], None]] = None,
             after_validate: Optional[Callable[[dict], None]] = None):
 
@@ -102,7 +104,7 @@ class CRUDManager(MWebCRUDBase):
             data = await self._mweb_crud_file.process_and_upload_files(request=request, upload_path=upload_path, upload_customizer=upload_customizer, data=data, uuid=uuid)
 
 
-        updated_model = await self.save_existing(record_id=record_id, data=data, request=request, before_save=before_save, after_save=after_save, model_instance=model_instance)
+        updated_model = await self.save_existing(record_id=record_id, data=data, request=request, before_save=before_save, after_save=after_save, model_instance=model_instance, ignore_keys=ignore_keys)
         if as_model:
             return updated_model
 

@@ -1,6 +1,6 @@
 from mweb import MWebResponse
 from mweb_crud.data_transfer import MWebBaseDTO, MWebDatedDTO, MWebIDDTO, MWebDTO
-from mweb_crud.randr import MWebRESTResponseData, MWebRESTResponseStatus, MWebRESTResponseCode, MWebRESTResponse
+from mweb_crud.randr import MWebRESTResponseData, MWebRESTResponseStatus, MWebRESTResponseCode
 from mweb_orm import MWebBaseModel, MWebIDModel, MWebDatedModel, MWebModel
 from mweb_orm.common import Pagination
 
@@ -8,7 +8,7 @@ from mweb_orm.common import Pagination
 class ResponseMaker:
 
     @classmethod
-    async def success(cls, content: str | dict | list, message: str = None, code: int = None, http_code: int = None, headers: dict = None):
+    async def success(cls, content: str | dict | list = None, message: str = None, code: int = None, http_code: int = None, headers: dict = None):
         if not code:
             code = MWebRESTResponseCode.success
 

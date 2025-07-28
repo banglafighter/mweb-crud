@@ -8,7 +8,7 @@ from mweb_crud.data_transfer import MWebBaseDTO, MWebIDDTO, MWebDatedDTO, MWebDT
 from mweb_crud.file_upload import MWebCRUDFile, UploadCustomizer
 from mweb_crud.helper import BeforeAfterSaveCallable, BeforeAfterDeleteCallable
 from mweb_orm import MWebBaseModel
-from typing import Optional, Callable
+from typing import Optional, Callable, Literal
 from mweb_orm.query import MWebQueryProcessor
 
 
@@ -54,7 +54,12 @@ class CRUDManager(MWebCRUDBase):
             after_validate: Optional[Callable[[dict], None]] = None):
 
         if data is None:
-            data = await self._request_context.get_data(validator=request, before_validate=before_validate, after_validate=after_validate, read_from="form" if allow_files else "json")
+            clean = False
+            read_from = "json"
+            if allow_files:
+                read_from = "form"
+                clean = True
+            data = await self._request_context.get_data(validator=request, before_validate=before_validate, after_validate=after_validate, read_from=read_from, clean=clean)
 
         uuid : str | None = None
         if allow_files:
@@ -91,7 +96,12 @@ class CRUDManager(MWebCRUDBase):
             after_validate: Optional[Callable[[dict], None]] = None):
 
         if data is None:
-            data = await self._request_context.get_data(validator=request, before_validate=before_validate, after_validate=after_validate, read_from="form" if allow_files else "json")
+            clean = False
+            read_from = "json"
+            if allow_files:
+                read_from = "form"
+                clean = True
+            data = await self._request_context.get_data(validator=request, before_validate=before_validate, after_validate=after_validate, read_from=read_from, clean=clean)
 
         record_id = DataUtil.dict_value(data=data, key="id")
         if not record_id:

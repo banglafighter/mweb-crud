@@ -117,3 +117,9 @@ class File(fields.String):
         if not isinstance(value, FileStorage) and not self.is_string_name and not self.is_uploaded:
             raise self.make_error("invalid")
         return value
+
+
+class CustomNestedField(fields.Nested):
+
+    def _deserialize(self, value, attr, data, partial=None, **kwargs):
+        return value

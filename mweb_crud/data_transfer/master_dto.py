@@ -99,5 +99,4 @@ class MWebMasterDTO(Schema):
         return self.dump(model, many=many)
 
     def clean_dict(self, data: dict | list, many: bool = False, partial: bool = False) -> dict | list:
-        self.validate(data=data, many=many, partial=partial)
-        return self.load(data=data, unknown=EXCLUDE)
+        return self.load(data=data, many=many, partial=partial, unknown="exclude")

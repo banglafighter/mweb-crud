@@ -34,7 +34,10 @@ class MWebRESTResponseData(SDLize):
                     error_text += str(text) + " "
             else:
                 error_text = messages
-            message_dict[field_name] = error_text.rstrip()
+
+            if isinstance(error_text, str):
+                error_text = error_text.rstrip()
+            message_dict[field_name] = error_text
         self.error = message_dict
         return self
 

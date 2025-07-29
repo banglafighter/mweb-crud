@@ -3,8 +3,8 @@ from marshmallow import ValidationError
 
 
 def validate_enum_value(values: list, value: str, key: str, message: str = "Value should be any of "):
-    if value not in values:
-        message += '(' + ', '.join(values) + ')'
+    if str(value) not in values:
+        message += '(' + ', '.join(str(v) for v in values) + ')'
         raise ValidationError(message, key)
 
 

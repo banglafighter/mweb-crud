@@ -1,6 +1,7 @@
 import enum
 import typing
 from marshmallow import fields
+from mw_common import DataCastType, MwConverter
 from mweb import FileStorage
 from mweb_crud.data_transfer.df_helper import validate_enum_value, BaseEnum
 
@@ -63,9 +64,11 @@ class Nested(fields.Nested):
 
 class Enum(fields.String):
     enumType: BaseEnum
+    cast_type: DataCastType | None = None
 
-    def __init__(self, enumType, *args, **kwargs):
-        self.enumType = enumType
+    def __init__(self, enum_type, *args, cast_type: DataCastType | None = None, **kwargs):
+        self.cast_type = cast_type
+        self.enumType = enum_type
         super(Enum, self).__init__(*args, **kwargs)
 
     def _serialize(self, value, attr, obj, **kwargs):
@@ -76,8 +79,9 @@ class Enum(fields.String):
     def _deserialize(self, value, attr, data, **kwargs):
         if hasattr(self.enumType, 'is_mw_enum'):
             validate_enum_value(self.enumType.values(), data[attr], attr)
-        name = self.enumType.value_to_key(data[attr])
-        return name
+        if self.cast_type is not None:
+            value = MwConverter.dynamic_cast(value, self.cast_type)
+        return value
 
 
 class File(fields.String):

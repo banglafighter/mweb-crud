@@ -13,6 +13,10 @@ class Integer(fields.Integer):
     pass
 
 
+class UUID(fields.UUID):
+    pass
+
+
 class Float(fields.Float):
     pass
 
@@ -74,6 +78,7 @@ class Enum(fields.String):
             validate_enum_value(self.enumType.values(), data[attr], attr)
         name = self.enumType.value_to_key(data[attr])
         return name
+
 
 class File(fields.String):
     max_size_kb: int = None

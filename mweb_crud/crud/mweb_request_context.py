@@ -37,6 +37,7 @@ class RequestContext:
             data = DataUtil.dict_value(data=wrapped_data, key="data", default=None)
         elif read_from == "form":
             data = await self.form_and_file_to_dict()
+            clean = True
 
         if data is None:
             raise MWebCRUDException(message=MWebCRUDConfig.INVALID_JSON_REQUEST_DATA_MSG)

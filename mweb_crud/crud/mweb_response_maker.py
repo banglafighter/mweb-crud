@@ -21,7 +21,7 @@ class ResponseMaker:
 
         if not message and isinstance(content, str):
             response.message = content
-        elif content and isinstance(content, dict):
+        else:
             response.data = content
 
         return await MWebResponse.make_response(content=response.to_dict(), headers=headers, http_code=http_code)
@@ -55,6 +55,18 @@ class ResponseMaker:
         if as_dict:
             return content
         return await MWebResponse.make_response(content=content, headers=headers, http_code=http_code)
+
+    @classmethod
+    async def paginated(cls, paginated_model: Pagination, data: list, message: str = None, code: int = None, http_code: int = None, headers: dict = None):
+        response = MWebRESTResponseData(
+            status=MWebRESTResponseStatus.success,
+            code=code,
+            message=message,
+            httpCode=http_code,
+            data=data,
+        )
+        response.set_pagination(pagination=paginated_model)
+        return await MWebResponse.make_response(content=response.to_dict(), headers=headers, http_code=http_code)
 
 
 

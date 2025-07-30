@@ -104,7 +104,7 @@ class CRUDManager(MWebCRUDBase):
             data = await self._request_context.get_data(validator=request, before_validate=before_validate, after_validate=after_validate, read_from=read_from, clean=clean)
 
         record_id = DataUtil.dict_value(data=data, key="id")
-        if not record_id:
+        if not record_id and not model_instance:
             self.raise_error(message=MWebCRUDConfig.ID_REQUIRED_MSG)
 
         if allow_files:

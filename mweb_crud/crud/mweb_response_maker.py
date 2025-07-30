@@ -57,7 +57,7 @@ class ResponseMaker:
         return await MWebResponse.make_response(content=content, headers=headers, http_code=http_code)
 
     @classmethod
-    async def paginated(cls, paginated_model: Pagination, data: list, message: str = None, code: int = None, http_code: int = None, headers: dict = None):
+    async def paginated(cls, paginated_model: Pagination, data: list, message: str = None, code: int = None, http_code: int = None, headers: dict = None, as_dict: bool = False):
         response = MWebRESTResponseData(
             status=MWebRESTResponseStatus.success,
             code=code,
@@ -66,7 +66,10 @@ class ResponseMaker:
             data=data,
         )
         response.set_pagination(pagination=paginated_model)
-        return await MWebResponse.make_response(content=response.to_dict(), headers=headers, http_code=http_code)
+        content = response.to_dict()
+        if as_dict:
+            return content
+        return await MWebResponse.make_response(content=content, headers=headers, http_code=http_code)
 
 
 

@@ -100,3 +100,7 @@ class MWebMasterDTO(Schema):
 
     def clean_dict(self, data: dict | list, many: bool = False, partial: bool = False) -> dict | list:
         return self.load(data=data, many=many, partial=partial, unknown="exclude")
+
+    def set_dump_default(self, field_name: str, value):
+        if field_name in self.dump_fields:
+            self.dump_fields[field_name].dump_default = value

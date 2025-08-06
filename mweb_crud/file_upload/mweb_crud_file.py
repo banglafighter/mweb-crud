@@ -53,7 +53,7 @@ class MWebCRUDFile:
             field = validator.fields[field_name]
             if isinstance(field, File):
                 file_storage: FileStorage = DataUtil.dict_value(data, field_name)
-                if file_storage:
+                if file_storage and isinstance(file_storage, FileStorage):
                     if not self.is_valid_size(file_storage=file_storage, field=field):
                         errors[field_name] = MWebCRUDConfig.FILE_SIZE_NOT_MATCH_MSG
                     elif not self.is_allowed_file_extension(file_storage=file_storage, field=field):

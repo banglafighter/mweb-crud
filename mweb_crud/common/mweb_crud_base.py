@@ -26,6 +26,10 @@ class MWebCRUDBase:
     async def get_by_id(self, record_id: int, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None) -> MWebBaseModel | MWebModel | None:
         if not query:
             query = self._model.query
+
+        if isinstance(record_id, str):
+            record_id = int(record_id)
+
         query = query.where(and_(self._model.id == record_id))
         return await self.get_first(query=query, message=message, raise_error=raise_error)
 

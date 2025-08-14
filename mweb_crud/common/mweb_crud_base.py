@@ -58,9 +58,9 @@ class MWebCRUDBase:
 
         return model
 
-    async def save_existing(self, record_id: int, data: dict, request: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, before_save: Optional[BeforeAfterSaveCallable] = None, after_save: Optional[BeforeAfterSaveCallable] = None, model_instance: MWebBaseModel | None = None, ignore_keys: list[str] | None = None):
+    async def save_existing(self, record_id: int, data: dict, request: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, before_save: Optional[BeforeAfterSaveCallable] = None, after_save: Optional[BeforeAfterSaveCallable] = None, model_instance: MWebBaseModel | None = None, ignore_keys: list[str] | None = None, query: MWebQueryProcessor | None = None):
         if not model_instance:
-            model_instance = await self.get_by_id(record_id=record_id, raise_error=True)
+            model_instance = await self.get_by_id(record_id=record_id, raise_error=True, query=query)
         return await self.save(data=data, request=request, before_save=before_save, after_save=after_save, model_instance=model_instance, ignore_keys=ignore_keys)
 
     async def soft_remove(self, record_id: int, query: MWebQueryProcessor | None = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):

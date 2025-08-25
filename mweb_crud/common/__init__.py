@@ -1,2 +1,3 @@
 from .mweb_crud_exeption import MWebCRUDException
 from .mweb_crud_const import SwaggerDataType
+from .mweb_crud_config import MWebCRUDConfig

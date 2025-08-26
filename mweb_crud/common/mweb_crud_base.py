@@ -33,6 +33,24 @@ class MWebCRUDBase:
         query = query.where(and_(self._model.id == record_id))
         return await self.get_first(query=query, message=message, raise_error=raise_error)
 
+    async def get_by_ids(self, ids: list, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None) -> list[MWebBaseModel | MWebModel] | None:
+        if not query:
+            query = self._model.query
+        query = self._add_delete_filter(query=query)
+        result = await query.where(and_(self._model.id.in_(ids))).read_all()
+        if result:
+            return result
+        elif raise_error:
+            if not message:
+                message = MWebCRUDConfig.RECORD_NOT_FOUND_MSG
+            raise MWebCRUDException(message=message)
+        return None
+
+    async def hard_delete_by_ids(self, ids: list, query: MWebQueryProcessor | None = None):
+        if not query:
+            query = self._model.query
+        await query.where(and_(self._model.id.in_(ids))).delete()
+
     async def get_first(self, query: MWebQueryProcessor, raise_error: bool = True, message: str | None = None) -> MWebBaseModel | None:
         query = self._add_delete_filter(query=query)
         result = await query.first()

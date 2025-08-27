@@ -24,7 +24,7 @@ class ResponseMaker:
         else:
             response.data = content
 
-        return await MWebResponse.make_response(content=response.to_dict(), headers=headers, http_code=http_code)
+        return await MWebResponse.json_response(content=response.to_json(), headers=headers, http_code=http_code)
 
 
     @classmethod
@@ -66,10 +66,10 @@ class ResponseMaker:
             data=data,
         )
         response.set_pagination(pagination=paginated_model)
-        content = response.to_dict()
         if as_dict:
-            return content
-        return await MWebResponse.make_response(content=content, headers=headers, http_code=http_code)
+            return response.to_dict()
+        content = response.to_json()
+        return await MWebResponse.json_response(content=content, headers=headers, http_code=http_code)
 
 
 
@@ -87,4 +87,4 @@ class ResponseMaker:
 
         if details:
             response.set_error(errors=details)
-        return await MWebResponse.make_response(content=response.to_dict(), headers=headers, http_code=http_code)
+        return await MWebResponse.json_response(content=response.to_json(), headers=headers, http_code=http_code)

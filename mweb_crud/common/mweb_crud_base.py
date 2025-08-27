@@ -5,7 +5,8 @@ from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
 from mweb_crud.crud import RequestContext, ResponseMaker
 from mweb_crud.data_transfer import MWebDTO, MWebBaseDTO, MWebIDDTO, MWebDatedDTO
 from mweb_crud.helper import BeforeAfterSaveCallable, BeforeAfterDeleteCallable
-from mweb_orm import MWebBaseModel, and_, MWebIDModel, MWebModel
+from mweb_orm import MWebBaseModel, and_, MWebIDModel, MWebModel, make_transient
+from mweb_orm.orm import mweb_orm
 from mweb_orm.query import MWebQueryProcessor
 
 
@@ -162,5 +163,17 @@ class MWebCRUDBase:
         if result and raise_error:
             raise MWebCRUDException(message=MWebCRUDConfig.DUPLICATE_ENTRY_ERROR_MSG, details={field_name: message})
 
-    def clone(self):
-        pass
+    def clone(self, model, none_props: list = None):
+        if model in mweb_orm.session:
+            mweb_orm.session.expunge(model)
+        make_transient(model)
+
+        if not none_props:
+            none_props = []
+
+        reset_props = ["id", "uuid", "created", "updated"] + none_props
+        for prop in reset_props:
+            if hasattr(model, prop):
+                setattr(model, prop, None)
+
+        return model

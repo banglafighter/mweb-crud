@@ -126,11 +126,11 @@ class CRUDManager(MWebCRUDBase):
             response_message = MWebCRUDConfig.UPDATE_SUCCESS_MSG
         return await self.make_success_response(model=updated_model, response_message=response_message, response=response)
 
-    async def details(self, record_id: int, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, query: MWebQueryProcessor | None = None, as_model: bool = False):
+    async def details(self, record_id: int, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, query: MWebQueryProcessor | None = None, as_model: bool = False, as_transform: bool = False):
         details = await self.get_by_id(record_id=record_id, query=query, raise_error=True)
         if as_model:
             return details
-        return await self._response_maker.success_from_model(model=details, transformer=response)
+        return await self._response_maker.success_from_model(model=details, transformer=response, as_transform=as_transform)
 
     async def delete(self, record_id: int, response_message: str = None, query: MWebQueryProcessor | None = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):
         if not response_message:

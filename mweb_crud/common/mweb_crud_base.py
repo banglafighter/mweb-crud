@@ -82,20 +82,26 @@ class MWebCRUDBase:
             model_instance = await self.get_by_id(record_id=record_id, raise_error=True, query=query)
         return await self.save(data=data, request=request, before_save=before_save, after_save=after_save, model_instance=model_instance, ignore_keys=ignore_keys)
 
-    async def soft_remove(self, record_id: int, query: MWebQueryProcessor | None = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):
-        existing_model = await self.get_by_id(record_id=record_id, query=query, raise_error=True)
-        if before_delete and callable(before_delete):
-            await before_delete(record_id=record_id, existing_model=existing_model)
+    async def soft_remove_by_model(self, delete_model, record_id: int = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):
+        if not record_id and delete_model:
+            record_id = delete_model.id
 
-        if existing_model and hasattr(existing_model, "isDeleted"):
-            existing_model.isDeleted = True
-            await existing_model.save()
+        if before_delete and callable(before_delete):
+            await before_delete(record_id=record_id, existing_model=delete_model)
+
+        if delete_model and hasattr(delete_model, "isDeleted"):
+            delete_model.isDeleted = True
+            await delete_model.save()
 
             if after_delete and callable(after_delete):
-                await after_delete(record_id=record_id, existing_model=existing_model)
+                await after_delete(record_id=record_id, existing_model=delete_model)
 
             return True
         return False
+
+    async def soft_remove(self, record_id: int, query: MWebQueryProcessor | None = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):
+        existing_model = await self.get_by_id(record_id=record_id, query=query, raise_error=True)
+        return await self.soft_remove_by_model(delete_model=existing_model, record_id=record_id, before_delete=before_delete, after_delete=after_delete)
 
     async def read_from_model(
             self,

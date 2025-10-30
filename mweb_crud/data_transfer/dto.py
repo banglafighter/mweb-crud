@@ -18,36 +18,51 @@ class String(fields.String, ExtendedFields):
         self.xlExport = xl_export
 
 
-class Integer(fields.Integer):
-    pass
+class Integer(fields.Integer, ExtendedFields):
+    def __init__(self, *args, xl_import=False, xl_export=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.xlImport = xl_import
+        self.xlExport = xl_export
 
 
 class UUID(fields.UUID):
     pass
 
 
-class Float(fields.Float):
-    pass
+class Float(fields.Float, ExtendedFields):
+    def __init__(self, *args, xl_import=False, xl_export=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.xlImport = xl_import
+        self.xlExport = xl_export
 
 
 class Decimal(fields.Decimal):
     pass
 
 
-class Boolean(fields.Boolean):
-    pass
+class Boolean(fields.Boolean, ExtendedFields):
+    def __init__(self, *args, xl_import=False, xl_export=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.xlImport = xl_import
+        self.xlExport = xl_export
 
 
-class DateTime(fields.DateTime):
-    pass
+class DateTime(fields.DateTime, ExtendedFields):
+    def __init__(self, *args, xl_import=False, xl_export=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.xlImport = xl_import
+        self.xlExport = xl_export
 
 
 class Time(fields.Time):
     pass
 
 
-class Date(fields.Date):
-    pass
+class Date(fields.Date, ExtendedFields):
+    def __init__(self, *args, xl_import=False, xl_export=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.xlImport = xl_import
+        self.xlExport = xl_export
 
 
 class Dict(fields.Dict):
@@ -58,8 +73,11 @@ class Url(fields.Url):
     pass
 
 
-class Email(fields.Email):
-    pass
+class Email(fields.Email, ExtendedFields):
+    def __init__(self, *args, xl_import=False, xl_export=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.xlImport = xl_import
+        self.xlExport = xl_export
 
 
 class List(fields.List):
@@ -70,14 +88,16 @@ class Nested(fields.Nested):
     pass
 
 
-class Enum(fields.String):
+class Enum(fields.String, ExtendedFields):
     enumType: BaseEnum
     cast_type: DataCastType | None = None
 
-    def __init__(self, enum_type, *args, cast_type: DataCastType | None = None, **kwargs):
+    def __init__(self, enum_type, *args, cast_type: DataCastType | None = None, xl_import=False, xl_export=False, **kwargs):
         self.cast_type = cast_type
         self.enumType = enum_type
         super(Enum, self).__init__(*args, **kwargs)
+        self.xlImport = xl_import
+        self.xlExport = xl_export
 
     def _serialize(self, value, attr, obj, **kwargs):
         if isinstance(value, enum.Enum):

@@ -6,8 +6,16 @@ from mweb import FileStorage
 from mweb_crud.data_transfer.df_helper import validate_enum_value, BaseEnum
 
 
-class String(fields.String):
-    pass
+class ExtendedFields:
+    xlImport: bool = True
+    xlExport: bool = True
+
+
+class String(fields.String, ExtendedFields):
+    def __init__(self, *args, xl_import=False, xl_export=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.xlImport = xl_import
+        self.xlExport = xl_export
 
 
 class Integer(fields.Integer):

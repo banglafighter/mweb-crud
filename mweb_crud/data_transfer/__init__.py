@@ -6,6 +6,10 @@ from .base_dto import (
     MWebIDDTO
 )
 
+from .mweb_crud_dto_util import (
+    MWebCrudDtoUtil,
+    MWebDtoData
+)
 from .df_helper import BaseEnum
 
 from marshmallow import (
@@ -33,4 +37,6 @@ __all__ = [
     "post_load",
     "post_dump",
     "pre_load",
+    "MWebCrudDtoUtil",
+    "MWebDtoData",
 ]

@@ -74,7 +74,7 @@ class ResponseMaker:
 
 
     @classmethod
-    async def error(cls, message: str, details: dict = None, code: int = None, http_code: int = None, headers: dict = None):
+    async def error(cls, message: str, details: dict = None, code: int = None, http_code: int = None, headers: dict = None, data: dict | list = None):
         if not code:
             code = MWebRESTResponseCode.error
 
@@ -83,6 +83,7 @@ class ResponseMaker:
             code=code,
             message=message,
             httpCode=http_code,
+            data=data,
         )
 
         if details:

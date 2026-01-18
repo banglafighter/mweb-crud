@@ -12,10 +12,18 @@ class ExtendedFields:
 
 
 class String(fields.String, ExtendedFields):
-    def __init__(self, *args, xl_import=False, xl_export=False, **kwargs):
+    des_cast: bool = False  # Deserialize casting
+
+    def __init__(self, *args, xl_import=False, xl_export=False, des_cast=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.xlImport = xl_import
         self.xlExport = xl_export
+        self.des_cast = des_cast
+
+    def _deserialize(self, value, attr, data, **kwargs) -> str:
+        if self.des_cast:
+            value = str(value)
+        return super()._deserialize(value, attr, data, **kwargs)
 
 
 class Integer(fields.Integer, ExtendedFields):
@@ -92,7 +100,8 @@ class Enum(fields.String, ExtendedFields):
     enumType: BaseEnum
     cast_type: DataCastType | None = None
 
-    def __init__(self, enum_type, *args, cast_type: DataCastType | None = None, xl_import=False, xl_export=False, **kwargs):
+    def __init__(self, enum_type, *args, cast_type: DataCastType | None = None, xl_import=False, xl_export=False,
+                 **kwargs):
         self.cast_type = cast_type
         self.enumType = enum_type
         super(Enum, self).__init__(*args, **kwargs)

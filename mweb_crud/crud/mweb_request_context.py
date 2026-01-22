@@ -20,6 +20,15 @@ class MWebRequestURLInfo:
 
 class RequestContext:
 
+    async def get_raw_body(self, default=None):
+        try:
+            data_body = await mweb_request.get_data()
+            if data_body is not None:
+                return data_body
+            return default
+        except Exception as e:
+            raise MWebCRUDException(message=str(e))
+
     async def get_json_body(self, default=None):
         try:
             json_dict = await mweb_request.get_json()
@@ -115,6 +124,9 @@ class RequestContext:
 
     def get_header(self, name: str, default=None):
         return mweb_request.headers.get(name, default)
+
+    def get_headers(self):
+        return mweb_request.headers
 
     def get_auth_header(self):
         header = self.get_header("Authorization")

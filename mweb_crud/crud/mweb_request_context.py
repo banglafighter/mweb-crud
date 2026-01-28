@@ -1,3 +1,4 @@
+import ipaddress
 import re
 from dataclasses import dataclass
 from typing import Optional, Callable, Literal
@@ -171,3 +172,22 @@ class RequestContext:
             url_info.urlRule = str(mweb_request.url_rule)
             url_info.baseURL = str(mweb_request.host_url).strip("/")
         return url_info
+
+    def get_source_ip(self, all_ip: bool = False) -> str | list[str] | None:
+        x_forwarded_for = mweb_request.headers.get("X-Forwarded-For", "")
+        remote_addr = mweb_request.remote_addr or ""
+        ip_candidates = [ip.strip() for ip in x_forwarded_for.split(",")] + [remote_addr]
+
+        valid_ips = []
+        for ip in ip_candidates:
+            try:
+                ipaddress.ip_address(ip)
+                valid_ips.append(ip)
+                if not all_ip:
+                    return ip
+            except ValueError:
+                continue
+
+        if all_ip:
+            return valid_ips or None
+        return None

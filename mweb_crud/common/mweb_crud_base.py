@@ -24,7 +24,7 @@ class MWebCRUDBase:
     def _add_delete_filter(self, query: MWebQueryProcessor, only: bool = False):
         return self._cb_helper.filter_deleted(model=self._model, query=query, only=only)
 
-    async def get_by_id(self, record_id: int, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None) -> MWebBaseModel | MWebModel | None:
+    async def get_by_id(self, record_id: int, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None, error_code: int = None, error_http_code: int = None) -> MWebBaseModel | MWebModel | None:
         if not query:
             query = self._model.query
 
@@ -32,9 +32,9 @@ class MWebCRUDBase:
             record_id = int(record_id)
 
         query = query.where(and_(self._model.id == record_id))
-        return await self.get_first(query=query, message=message, raise_error=raise_error)
+        return await self.get_first(query=query, message=message, raise_error=raise_error, error_code=error_code, error_http_code=error_http_code)
 
-    async def get_by_ids(self, ids: list, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None) -> list[MWebBaseModel | MWebModel] | None:
+    async def get_by_ids(self, ids: list, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None, error_code: int = None, error_http_code: int = None) -> list[MWebBaseModel | MWebModel] | None:
         if not query:
             query = self._model.query
         query = self._add_delete_filter(query=query)
@@ -44,7 +44,7 @@ class MWebCRUDBase:
         elif raise_error:
             if not message:
                 message = MWebCRUDConfig.RECORD_NOT_FOUND_MSG
-            raise MWebCRUDException(message=message)
+            raise MWebCRUDException(message=message, error_code=error_code, http_code=error_http_code)
         return None
 
     async def hard_delete_by_ids(self, ids: list, query: MWebQueryProcessor | None = None):
@@ -52,7 +52,7 @@ class MWebCRUDBase:
             query = self._model.query
         await query.where(and_(self._model.id.in_(ids))).delete()
 
-    async def get_first(self, query: MWebQueryProcessor, raise_error: bool = True, message: str | None = None) -> MWebBaseModel | None:
+    async def get_first(self, query: MWebQueryProcessor, raise_error: bool = True, message: str | None = None, error_code: int = None, error_http_code: int = None) -> MWebBaseModel | None:
         query = self._add_delete_filter(query=query)
         result = await query.first()
         if result:
@@ -60,7 +60,7 @@ class MWebCRUDBase:
         elif raise_error:
             if not message:
                 message = MWebCRUDConfig.RECORD_NOT_FOUND_MSG
-            raise MWebCRUDException(message=message)
+            raise MWebCRUDException(message=message, error_code=error_code, http_code=error_http_code)
         return None
 
     async def save(self, data: dict, request: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, before_save: Optional[BeforeAfterSaveCallable] = None, after_save: Optional[BeforeAfterSaveCallable] = None, model_instance: MWebBaseModel | None = None, uuid: str | None = None, ignore_keys: list[str] | None = None) -> MWebBaseModel | None:
@@ -153,7 +153,7 @@ class MWebCRUDBase:
 
         return await query.read_all()
 
-    async def check_unique(self, field_name: str, value, query: MWebQueryProcessor | None = None, not_record_id: int = None, raise_error: bool = True, message: str | None = None):
+    async def check_unique(self, field_name: str, value, query: MWebQueryProcessor | None = None, not_record_id: int = None, raise_error: bool = True, message: str | None = None, error_code: int = None, error_http_code: int = None):
         if not query:
             query = self._model.query
         query = query.where(and_(getattr(self._model, field_name) == value))
@@ -167,7 +167,7 @@ class MWebCRUDBase:
             message = MWebCRUDConfig.VALUE_ALREADY_EXISTS_MSG
 
         if result and raise_error:
-            raise MWebCRUDException(message=MWebCRUDConfig.DUPLICATE_ENTRY_ERROR_MSG, details={field_name: message})
+            raise MWebCRUDException(message=MWebCRUDConfig.DUPLICATE_ENTRY_ERROR_MSG, details={field_name: message}, error_code=error_code, http_code=error_http_code)
 
     def clone(self, model, none_props: list = None):
         if model in mweb_orm.session:

@@ -1,5 +1,5 @@
-from mweb_crud.data_transfer import dto
-from mweb_crud.data_transfer.master_dto import MWebMasterDTO
+from . import dto
+from .master_dto import MWebMasterDTO
 
 
 class MWebBaseDTO(MWebMasterDTO):

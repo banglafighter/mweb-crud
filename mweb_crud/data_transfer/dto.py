@@ -3,7 +3,7 @@ import typing
 from marshmallow import fields
 from mw_common import DataCastType, MwConverter
 from mweb import FileStorage
-from mweb_crud.data_transfer.df_helper import validate_enum_value, BaseEnum
+from .df_helper import validate_enum_value, BaseEnum
 
 
 class ExtendedFields:

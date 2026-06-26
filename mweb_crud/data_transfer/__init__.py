@@ -39,4 +39,5 @@ __all__ = [
     "pre_load",
     "MWebCrudDtoUtil",
     "MWebDtoData",
+    "BaseEnum",
 ]

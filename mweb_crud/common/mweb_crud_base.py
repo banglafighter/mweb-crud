@@ -1,13 +1,11 @@
 from typing import Optional
-from mweb_crud.common import MWebCRUDException
-from mweb_crud.common.mweb_cb_helper import MWebCBHelper
-from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
-from mweb_crud.crud import RequestContext, ResponseMaker
-from mweb_crud.data_transfer import MWebDTO, MWebBaseDTO, MWebIDDTO, MWebDatedDTO
-from mweb_crud.helper import BeforeAfterSaveCallable, BeforeAfterDeleteCallable
-from mweb_orm import MWebBaseModel, and_, MWebIDModel, MWebModel, make_transient
-from mweb_orm.orm import mweb_orm
-from mweb_orm.query import MWebQueryProcessor
+from ..common import MWebCRUDException
+from ..common.mweb_cb_helper import MWebCBHelper
+from ..common.mweb_crud_config import MWebCRUDConfig
+from ..crud import RequestContext, ResponseMaker
+from ..data_transfer import MWebDTO, MWebBaseDTO, MWebIDDTO, MWebDatedDTO
+from ..helper import BeforeAfterSaveCallable, BeforeAfterDeleteCallable
+from mweb_orm import MWebBaseModel, and_, MWebIDModel, MWebModel, make_transient, orm, MWebQueryProcessor
 
 
 class MWebCRUDBase:
@@ -170,8 +168,8 @@ class MWebCRUDBase:
             raise MWebCRUDException(message=MWebCRUDConfig.DUPLICATE_ENTRY_ERROR_MSG, details={field_name: message}, error_code=error_code, http_code=error_http_code)
 
     def clone(self, model, none_props: list = None):
-        if model in mweb_orm.session:
-            mweb_orm.session.expunge(model)
+        if model in orm.session:
+            orm.session.expunge(model)
         make_transient(model)
 
         if not none_props:

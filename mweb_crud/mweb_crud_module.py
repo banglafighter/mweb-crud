@@ -1,9 +1,7 @@
-from mweb import MWebBase, MWebConfig
-from mweb.engine.mweb_hook import MWebHook
-from mweb.engine.mweb_util import MWebUtil
+from mweb import MWebBase, MWebConfig, MWebHook, MWebUtil
 import mweb_crud.common.mweb_crud_config
-from mweb_crud.common import MWebCRUDException
-from mweb_crud.swagger.mweb_swagger_ui import MWebSwaggerUI
+from .common import MWebCRUDException
+from .swagger.mweb_swagger_ui import MWebSwaggerUI
 
 
 class MWebCRUDModule:

@@ -1,8 +1,7 @@
 from mweb import MWebResponse
-from mweb_crud.data_transfer import MWebBaseDTO, MWebDatedDTO, MWebIDDTO, MWebDTO
-from mweb_crud.randr import MWebRESTResponseData, MWebRESTResponseStatus, MWebRESTResponseCode
-from mweb_orm import MWebBaseModel, MWebIDModel, MWebDatedModel, MWebModel
-from mweb_orm.common import Pagination
+from ..data_transfer import MWebBaseDTO, MWebDatedDTO, MWebIDDTO, MWebDTO
+from ..randr import MWebRESTResponseData, MWebRESTResponseStatus, MWebRESTResponseCode
+from mweb_orm import MWebBaseModel, MWebIDModel, MWebDatedModel, MWebModel, Pagination
 
 
 class ResponseMaker:

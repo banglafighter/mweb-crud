@@ -1,8 +1,8 @@
 from functools import wraps
 from mw_common import HTTPContentType, HTTPMethod
-from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
-from mweb_crud.common.mweb_crud_const import SwaggerDefinitionType, SwaggerCommon, SwaggerDataType
-from mweb_crud.swagger.mweb_swagger_data import SwaggerData
+from ..common.mweb_crud_config import MWebCRUDConfig
+from ..common.mweb_crud_const import SwaggerDefinitionType, SwaggerCommon, SwaggerDataType
+from .mweb_swagger_data import SwaggerData
 
 
 def add_swagger_endpoint(

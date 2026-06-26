@@ -1,11 +1,11 @@
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from apispec.ext.marshmallow.field_converter import FieldConverterMixin
-from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
-from mweb_crud.common.mweb_crud_const import SwaggerCommon, SwaggerDataType, SwaggerDefinitionType
-from mweb_crud.data_transfer import dto
-from mweb_crud.swagger.mweb_swagger_data import SwaggerData
-from mweb_crud.swagger.mweb_swagger_schema import MWebSwaggerSchema
+from ..common.mweb_crud_config import MWebCRUDConfig
+from ..common.mweb_crud_const import SwaggerCommon, SwaggerDataType, SwaggerDefinitionType
+from ..data_transfer import dto
+from .mweb_swagger_data import SwaggerData
+from .mweb_swagger_schema import MWebSwaggerSchema
 
 
 class MWebSwaggerGenerator:

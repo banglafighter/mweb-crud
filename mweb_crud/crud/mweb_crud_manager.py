@@ -1,15 +1,14 @@
 from mw_common import DataUtil, MwUtil
-from mweb_crud.common import MWebCRUDException
-from mweb_crud.common.mweb_cb_helper import MWebCBHelper
-from mweb_crud.common.mweb_crud_base import MWebCRUDBase
-from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
-from mweb_crud.crud import RequestContext, ResponseMaker
-from mweb_crud.data_transfer import MWebBaseDTO, MWebIDDTO, MWebDatedDTO, MWebDTO
-from mweb_crud.file_upload import MWebCRUDFile, UploadCustomizer
-from mweb_crud.helper import BeforeAfterSaveCallable, BeforeAfterDeleteCallable
-from mweb_orm import MWebBaseModel
-from typing import Optional, Callable, Literal
-from mweb_orm.query import MWebQueryProcessor
+from ..common import MWebCRUDException
+from ..common.mweb_cb_helper import MWebCBHelper
+from ..common.mweb_crud_base import MWebCRUDBase
+from ..common.mweb_crud_config import MWebCRUDConfig
+from ..crud import RequestContext, ResponseMaker
+from ..data_transfer import MWebBaseDTO, MWebIDDTO, MWebDatedDTO, MWebDTO
+from ..file_upload import MWebCRUDFile, UploadCustomizer
+from ..helper import BeforeAfterSaveCallable, BeforeAfterDeleteCallable
+from mweb_orm import MWebBaseModel, MWebQueryProcessor
+from typing import Optional, Callable
 
 
 class CRUDManager(MWebCRUDBase):

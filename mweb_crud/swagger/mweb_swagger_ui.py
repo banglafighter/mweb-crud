@@ -1,8 +1,8 @@
 from quart import request
 from mweb import MWebBase, SSRController, MWebResponse
-from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
-from mweb_crud.swagger.mweb_sd_processor import MWebSDProcessor
-from mweb_crud.swagger.mweb_swagger_generator import MWebSwaggerGenerator
+from ..common.mweb_crud_config import MWebCRUDConfig
+from .mweb_sd_processor import MWebSDProcessor
+from .mweb_swagger_generator import MWebSwaggerGenerator
 
 
 class MWebSwaggerUI:

@@ -1,8 +1,8 @@
 import types
 from mweb import MWebBase
-from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
-from mweb_crud.common.mweb_crud_const import SwaggerCommon
-from mweb_crud.swagger.mweb_swagger_data import SwaggerData
+from ..common.mweb_crud_config import MWebCRUDConfig
+from ..common.mweb_crud_const import SwaggerCommon
+from .mweb_swagger_data import SwaggerData
 
 
 class MWebSDProcessor:

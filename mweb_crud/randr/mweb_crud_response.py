@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from mw_common import SDLize
 from .mweb_crud_randr_const import MWebRESTResponseCode, MWebRESTResponseStatus
-from mweb_orm.common import Pagination
+from mweb_orm import Pagination
 
 
 @dataclass(kw_only=True)

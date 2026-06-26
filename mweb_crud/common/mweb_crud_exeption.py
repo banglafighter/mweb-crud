@@ -1,6 +1,6 @@
-from mw_common.mw_exception import MwException
+from mw_common import MwException
 from mweb import MWebResponse
-from mweb_crud.randr import MWebRESTResponseData, MWebRESTResponse, MWebRESTResponseStatus, MWebRESTResponseCode
+from ..randr import MWebRESTResponseData, MWebRESTResponse, MWebRESTResponseStatus, MWebRESTResponseCode
 
 
 class MWebCRUDException(MwException):

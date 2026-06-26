@@ -3,3 +3,12 @@ from .swagger.mweb_swagger_decorator import mweb_paginate_endpoint
 from .swagger.mweb_swagger_decorator import mweb_upload_endpoint
 from .swagger.mweb_swagger_decorator import mweb_endpoint
 from .mweb_crud_module import MWebCRUDModule
+
+
+__all__ = [
+    "dto",
+    "mweb_paginate_endpoint",
+    "mweb_upload_endpoint",
+    "mweb_endpoint",
+    "MWebCRUDModule"
+]

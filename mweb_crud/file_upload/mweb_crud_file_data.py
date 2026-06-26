@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from mweb import FileStorage
-from mweb_crud.data_transfer.dto import File
+from ..data_transfer.dto import File
 
 
 @dataclass

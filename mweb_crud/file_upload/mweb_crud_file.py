@@ -1,11 +1,11 @@
 from mw_common import DataUtil
 from mw_file_content import FileUtil
 from mweb import FileStorage
-from mweb_crud.common import MWebCRUDException
-from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
-from mweb_crud.data_transfer import MWebBaseDTO, MWebDTO, MWebIDDTO, MWebDatedDTO
-from mweb_crud.data_transfer.dto import File
-from mweb_crud.file_upload import UploadFileName, UploadCustomizer
+from ..common import MWebCRUDException
+from ..common.mweb_crud_config import MWebCRUDConfig
+from ..data_transfer import MWebBaseDTO, MWebDTO, MWebIDDTO, MWebDatedDTO
+from ..data_transfer.dto import File
+from ..file_upload import UploadFileName, UploadCustomizer
 
 
 class MWebCRUDFile:

@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields
-from mweb_crud.common.mweb_crud_const import SwaggerCommon
-from mweb_crud.swagger.mweb_swagger_data import SwaggerData
+from ..common.mweb_crud_const import SwaggerCommon
+from .mweb_swagger_data import SwaggerData
 
 
 class MWebSwaggerSchema:

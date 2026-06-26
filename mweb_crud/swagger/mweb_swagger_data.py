@@ -1,7 +1,7 @@
 import random
 import string
-from mw_common.mw_const import HTTPContentType
-from mweb_crud.common.mweb_crud_const import SwaggerDefinitionType
+from mw_common import HTTPContentType
+from ..common.mweb_crud_const import SwaggerDefinitionType
 
 
 class SwaggerData:

@@ -1,7 +1,6 @@
-from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
-from mweb_crud.crud import RequestContext
-from mweb_orm import MWebBaseModel, and_, MWebIDModel, or_
-from mweb_orm.query import MWebQueryProcessor
+from ..common.mweb_crud_config import MWebCRUDConfig
+from ..crud import RequestContext
+from mweb_orm import MWebBaseModel, and_, MWebIDModel, or_, MWebQueryProcessor
 
 
 # MWeb CRUD Base Helper

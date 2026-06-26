@@ -1,8 +1,8 @@
 from marshmallow import EXCLUDE, Schema, RAISE
 from sqlalchemy import inspect
 from mw_common import DataUtil
-from mweb_crud.common import MWebCRUDException
-from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
+from ..common import MWebCRUDException
+from ..common.mweb_crud_config import MWebCRUDConfig
 from mweb_orm import MWebBaseModel, MWebModel, MWebDatedModel, MWebIDModel
 from dataclasses import fields
 

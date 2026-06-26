@@ -4,9 +4,9 @@ from dataclasses import dataclass
 from typing import Optional, Callable, Literal
 from mw_common import DataUtil
 from mweb import mweb_request
-from mweb_crud.common import MWebCRUDException
-from mweb_crud.common.mweb_crud_config import MWebCRUDConfig
-from mweb_crud.data_transfer import MWebBaseDTO, MWebDTO, MWebIDDTO, MWebDatedDTO
+from ..common import MWebCRUDException
+from ..common.mweb_crud_config import MWebCRUDConfig
+from ..data_transfer import MWebBaseDTO, MWebDTO, MWebIDDTO, MWebDatedDTO
 
 
 @dataclass

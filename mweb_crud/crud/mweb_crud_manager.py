@@ -50,7 +50,8 @@ class CRUDManager(MWebCRUDBase):
             upload_path: str | None = None,
             ignore_keys: list[str] | None = None,
             before_validate: Optional[Callable[[dict], None]] = None,
-            after_validate: Optional[Callable[[dict], None]] = None):
+            after_validate: Optional[Callable[[dict], None]] = None,
+            allow_fsp: bool = False):
 
         if data is None:
             clean = False
@@ -60,12 +61,16 @@ class CRUDManager(MWebCRUDBase):
                 clean = True
             data = await self._request_context.get_data(validator=request, before_validate=before_validate, after_validate=after_validate, read_from=read_from, clean=clean)
 
-        uuid : str | None = None
+        fsp: str | None = None
+        if allow_fsp:
+            fsp = MwUtil.fsp()
+
+        uuid: str | None = None
         if allow_files:
             uuid = MwUtil.uuid()
-            data = await self._mweb_crud_file.process_and_upload_files(request=request, upload_path=upload_path, upload_customizer=upload_customizer, data=data, uuid=uuid)
+            data = await self._mweb_crud_file.process_and_upload_files(request=request, upload_path=upload_path, upload_customizer=upload_customizer, data=data, uuid=uuid, fsp=fsp)
 
-        saved_model = await self.save(data=data, request=request, before_save=before_save, after_save=after_save, uuid=uuid, ignore_keys=ignore_keys)
+        saved_model = await self.save(data=data, request=request, before_save=before_save, after_save=after_save, uuid=uuid, ignore_keys=ignore_keys, fsp=fsp)
         if as_model:
             return saved_model
 
@@ -75,7 +80,6 @@ class CRUDManager(MWebCRUDBase):
         if not response_message:
             response_message = MWebCRUDConfig.CREATE_SUCCESS_MSG
         return await self.make_success_response(model=saved_model, response_message=response_message, response=response)
-
 
     async def update(
             self,
@@ -93,7 +97,8 @@ class CRUDManager(MWebCRUDBase):
             ignore_keys: list[str] | None = None,
             query: MWebQueryProcessor | None = None,
             before_validate: Optional[Callable[[dict], None]] = None,
-            after_validate: Optional[Callable[[dict], None]] = None):
+            after_validate: Optional[Callable[[dict], None]] = None,
+            allow_fsp: bool = False):
 
         if data is None:
             clean = False
@@ -107,11 +112,14 @@ class CRUDManager(MWebCRUDBase):
         if not record_id and not model_instance:
             self.raise_error(message=MWebCRUDConfig.ID_REQUIRED_MSG)
 
+        fsp: str | None = None
         if allow_files:
             if not model_instance:
                 model_instance = await self.get_by_id(record_id=record_id, raise_error=True, query=query)
             uuid = model_instance.uuid
-            data = await self._mweb_crud_file.process_and_upload_files(request=request, upload_path=upload_path, upload_customizer=upload_customizer, data=data, uuid=uuid)
+            if allow_fsp and hasattr(model_instance, "fsp"):
+                fsp = getattr(model_instance, "fsp", None)
+            data = await self._mweb_crud_file.process_and_upload_files(request=request, upload_path=upload_path, upload_customizer=upload_customizer, data=data, uuid=uuid, fsp=fsp)
 
 
         updated_model = await self.save_existing(record_id=record_id, data=data, request=request, before_save=before_save, after_save=after_save, model_instance=model_instance, ignore_keys=ignore_keys, query=query)

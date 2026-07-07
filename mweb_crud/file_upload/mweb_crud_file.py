@@ -82,13 +82,17 @@ class MWebCRUDFile:
         return file_name_map
 
 
-    async def process_and_upload_files(self, request: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, upload_path: str, data: dict, uuid: str, upload_customizer: UploadCustomizer | None = None):
+    async def process_and_upload_files(self, request: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, upload_path: str | None, data: dict, uuid: str, upload_customizer: UploadCustomizer | None = None, fsp : str | None = None):
         self.validate_files(data=data, validator=request)
         if upload_path is None:
             raise MWebCRUDException(message=MWebCRUDConfig.INVALID_FILE_UPLOAD_PATH_MSG)
         file_name_map = self.prepare_name(uuid=uuid, data=data, validator=request, upload_customizer=upload_customizer)
 
-        FileUtil.create_directories(upload_path)
+        upload_store_path: str = upload_path
+        if fsp:
+            upload_store_path = FileUtil.join_path(upload_path, fsp)
+
+        FileUtil.create_directories(upload_store_path)
         for field_name in file_name_map:
             file_storage: FileStorage = DataUtil.dict_value(data=data, key=field_name)
             if file_storage and isinstance(file_storage, FileStorage):
@@ -97,8 +101,8 @@ class MWebCRUDFile:
                 if filename:
                     filename = filename.lower()
 
-                if upload_customizer is None or not await upload_customizer.custom_upload(upload_path=upload_path, data=data, uuid=uuid, field=field_name, file_storage=file_storage):
-                    file_upload_path = FileUtil.join_path(upload_path, filename)
+                if upload_customizer is None or not await upload_customizer.custom_upload(upload_path=upload_store_path, data=data, uuid=uuid, field=field_name, file_storage=file_storage):
+                    file_upload_path = FileUtil.join_path(upload_store_path, filename)
                     FileUtil.delete(file_upload_path)
                     await file_storage.save(file_upload_path)
                     request.fields[field_name].is_uploaded = True

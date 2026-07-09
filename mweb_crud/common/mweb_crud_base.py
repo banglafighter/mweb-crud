@@ -1,4 +1,5 @@
 from typing import Optional
+from uuid import UUID
 from ..common import MWebCRUDException
 from ..common.mweb_cb_helper import MWebCBHelper
 from ..common.mweb_crud_config import MWebCRUDConfig
@@ -14,7 +15,7 @@ class MWebCRUDBase:
     _cb_helper: MWebCBHelper = None
     _response_maker: ResponseMaker = None
 
-    async def make_success_response(self, model: MWebBaseModel, response_message: str = None, response: MWebBaseDTO = None):
+    async def make_success_response(self, model: MWebBaseModel, response_message: str | None = None, response: MWebBaseDTO | None = None):
         if response:
             return await self._response_maker.success_from_model(model=model, transformer=response, message=response_message)
         return await self._response_maker.success(content=response_message)
@@ -61,7 +62,7 @@ class MWebCRUDBase:
             raise MWebCRUDException(message=message, error_code=error_code, http_code=error_http_code)
         return None
 
-    async def save(self, data: dict, request: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, before_save: Optional[BeforeAfterSaveCallable] = None, after_save: Optional[BeforeAfterSaveCallable] = None, model_instance: MWebBaseModel | None = None, uuid: str | None = None, ignore_keys: list[str] | None = None, fsp : str | None = None) -> MWebBaseModel | None:
+    async def save(self, data: dict, request: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, before_save: Optional[BeforeAfterSaveCallable] = None, after_save: Optional[BeforeAfterSaveCallable] = None, model_instance: MWebBaseModel | None = None, uuid: UUID | None = None, ignore_keys: list[str] | None = None, fsp : str | None = None) -> MWebBaseModel | None:
         model = request.to_model(data=data, model_instance=model_instance, ignore_keys=ignore_keys)
         if uuid:
             model.uuid = uuid
@@ -84,7 +85,7 @@ class MWebCRUDBase:
             model_instance = await self.get_by_id(record_id=record_id, raise_error=True, query=query)
         return await self.save(data=data, request=request, before_save=before_save, after_save=after_save, model_instance=model_instance, ignore_keys=ignore_keys, fsp=fsp)
 
-    async def soft_remove_by_model(self, delete_model, record_id: int = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):
+    async def soft_remove_by_model(self, delete_model, record_id: int | None = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):
         if not record_id and delete_model:
             record_id = delete_model.id
 

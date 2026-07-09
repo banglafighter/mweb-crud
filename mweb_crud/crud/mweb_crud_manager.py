@@ -1,3 +1,4 @@
+from uuid import UUID
 from mw_common import DataUtil, MwUtil
 from ..common import MWebCRUDException
 from ..common.mweb_cb_helper import MWebCBHelper
@@ -65,10 +66,10 @@ class CRUDManager(MWebCRUDBase):
         if allow_fsp:
             fsp = MwUtil.fsp()
 
-        uuid: str | None = None
+        uuid: UUID | None = None
         if allow_files:
-            uuid = MwUtil.uuid()
-            data = await self._mweb_crud_file.process_and_upload_files(request=request, upload_path=upload_path, upload_customizer=upload_customizer, data=data, uuid=uuid, fsp=fsp)
+            uuid = MwUtil.uuid7()
+            data = await self._mweb_crud_file.process_and_upload_files(request=request, upload_path=upload_path, upload_customizer=upload_customizer, data=data, uuid=str(uuid), fsp=fsp)
 
         saved_model = await self.save(data=data, request=request, before_save=before_save, after_save=after_save, uuid=uuid, ignore_keys=ignore_keys, fsp=fsp)
         if as_model:
@@ -85,8 +86,8 @@ class CRUDManager(MWebCRUDBase):
             self,
             request: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO,
             response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO | None = None,
-            response_message: str = None,
-            data: dict = None,
+            response_message: str | None = None,
+            data: dict | None = None,
             before_save: Optional[BeforeAfterSaveCallable] = None,
             after_save: Optional[BeforeAfterSaveCallable] = None,
             as_model: bool = False,
@@ -141,7 +142,7 @@ class CRUDManager(MWebCRUDBase):
             return details
         return await self._response_maker.success_from_model(model=details, transformer=response, as_transform=as_transform)
 
-    async def delete(self, record_id: int, response_message: str = None, query: MWebQueryProcessor | None = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):
+    async def delete(self, record_id: int, response_message: str | None = None, query: MWebQueryProcessor | None = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):
         if not response_message:
             response_message = MWebCRUDConfig.DELETE_SUCCESS_MSG
         is_removed = await self.soft_remove(record_id=record_id, query=query, before_delete=before_delete, after_delete=after_delete)
@@ -149,7 +150,7 @@ class CRUDManager(MWebCRUDBase):
             return await self._response_maker.success(content=response_message)
         return await self._response_maker.error(message=MWebCRUDConfig.FAILED_TO_DELETE_RECORD_MSG)
 
-    async def read_all(self, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, search_fields: list = None, sort_field: str | None = None, sort_order: str | None = None, sort: bool = True, query: MWebQueryProcessor | None = None, as_list: bool = False, as_dict: bool = False, as_transform: bool = False):
+    async def read_all(self, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, search_fields: list | None = None, sort_field: str | None = None, sort_order: str | None = None, sort: bool = True, query: MWebQueryProcessor | None = None, as_list: bool = False, as_dict: bool = False, as_transform: bool = False):
         result = await self.read_from_model(
             search_fields=search_fields,
             sort_field=sort_field,
@@ -164,7 +165,7 @@ class CRUDManager(MWebCRUDBase):
 
         return await self._response_maker.success_from_model(model=result, transformer=response, as_dict=as_dict, as_transform=as_transform)
 
-    async def paginated_read_all(self, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, search_fields: list = None, sort_field: str | None = None, sort_order: str | None = None, sort: bool = True, item_per_page: int | None = None, query: MWebQueryProcessor | None = None, as_list: bool = False, as_dict: bool = False, as_transform: bool = False):
+    async def paginated_read_all(self, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, search_fields: list | None = None, sort_field: str | None = None, sort_order: str | None = None, sort: bool = True, item_per_page: int | None = None, query: MWebQueryProcessor | None = None, as_list: bool = False, as_dict: bool = False, as_transform: bool = False):
         result = await self.read_from_model(
             search_fields=search_fields,
             sort_field=sort_field,

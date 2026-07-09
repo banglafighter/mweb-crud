@@ -117,12 +117,14 @@ class CRUDManager(MWebCRUDBase):
             if not model_instance:
                 model_instance = await self.get_by_id(record_id=record_id, raise_error=True, query=query)
             uuid = model_instance.uuid
+
             if allow_fsp and hasattr(model_instance, "fsp"):
                 fsp = getattr(model_instance, "fsp", None)
+            if allow_fsp and not fsp:
+                fsp = MwUtil.fsp()
             data = await self._mweb_crud_file.process_and_upload_files(request=request, upload_path=upload_path, upload_customizer=upload_customizer, data=data, uuid=uuid, fsp=fsp)
 
-
-        updated_model = await self.save_existing(record_id=record_id, data=data, request=request, before_save=before_save, after_save=after_save, model_instance=model_instance, ignore_keys=ignore_keys, query=query)
+        updated_model = await self.save_existing(record_id=record_id, data=data, request=request, before_save=before_save, after_save=after_save, model_instance=model_instance, ignore_keys=ignore_keys, query=query, fsp=fsp)
         if as_model:
             return updated_model
 

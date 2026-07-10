@@ -23,7 +23,7 @@ class MWebCRUDBase:
     def _add_delete_filter(self, query: MWebQueryProcessor, only: bool = False):
         return self._cb_helper.filter_deleted(model=self._model, query=query, only=only)
 
-    async def get_by_id(self, record_id: int, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None, error_code: int = None, error_http_code: int = None) -> MWebBaseModel | MWebModel | None:
+    async def get_by_id(self, record_id: int, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None, error_code: int | None = None, error_http_code: int | None = None) -> MWebBaseModel | MWebModel | None:
         if not query:
             query = self._model.query
 
@@ -33,7 +33,14 @@ class MWebCRUDBase:
         query = query.where(and_(self._model.id == record_id))
         return await self.get_first(query=query, message=message, raise_error=raise_error, error_code=error_code, error_http_code=error_http_code)
 
-    async def get_by_ids(self, ids: list, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None, error_code: int = None, error_http_code: int = None) -> list[MWebBaseModel | MWebModel] | None:
+    async def get_by_uuid(self, uuid: str, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None, error_code: int | None = None, error_http_code: int | None = None) -> MWebBaseModel | MWebModel | None:
+        if not query:
+            query = self._model.query
+
+        query = query.where(and_(self._model.uuid == uuid))
+        return await self.get_first(query=query, message=message, raise_error=raise_error, error_code=error_code, error_http_code=error_http_code)
+
+    async def get_by_ids(self, ids: list, query: MWebQueryProcessor | None = None, raise_error: bool = True, message: str | None = None, error_code: int | None = None, error_http_code: int | None = None) -> list[MWebBaseModel | MWebModel] | None:
         if not query:
             query = self._model.query
         query = self._add_delete_filter(query=query)
@@ -80,9 +87,14 @@ class MWebCRUDBase:
 
         return model
 
-    async def save_existing(self, record_id: int, data: dict, request: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, before_save: Optional[BeforeAfterSaveCallable] = None, after_save: Optional[BeforeAfterSaveCallable] = None, model_instance: MWebBaseModel | None = None, ignore_keys: list[str] | None = None, query: MWebQueryProcessor | None = None, fsp : str | None = None):
+    async def save_existing(self, data: dict, request: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, record_id: int | None = None, uuid: str | None = None, before_save: Optional[BeforeAfterSaveCallable] = None, after_save: Optional[BeforeAfterSaveCallable] = None, model_instance: MWebBaseModel | None = None, ignore_keys: list[str] | None = None, query: MWebQueryProcessor | None = None, fsp : str | None = None):
         if not model_instance:
-            model_instance = await self.get_by_id(record_id=record_id, raise_error=True, query=query)
+            if record_id:
+                model_instance = await self.get_by_id(record_id=record_id, raise_error=True, query=query)
+            elif uuid:
+                model_instance = await self.get_by_uuid(uuid=uuid, raise_error=True, query=query)
+            else:
+                raise MWebCRUDException(message=MWebCRUDConfig.RECORD_ID_OR_UUID_REQUIRED_MSG)
         return await self.save(data=data, request=request, before_save=before_save, after_save=after_save, model_instance=model_instance, ignore_keys=ignore_keys, fsp=fsp)
 
     async def soft_remove_by_model(self, delete_model, record_id: int | None = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):
@@ -102,8 +114,13 @@ class MWebCRUDBase:
             return True
         return False
 
-    async def soft_remove(self, record_id: int, query: MWebQueryProcessor | None = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):
-        existing_model = await self.get_by_id(record_id=record_id, query=query, raise_error=True)
+    async def soft_remove(self, record_id: int | None = None, uuid: str | None = None, query: MWebQueryProcessor | None = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):
+        if record_id:
+            existing_model = await self.get_by_id(record_id=record_id, query=query, raise_error=True)
+        elif uuid:
+            existing_model = await self.get_by_uuid(uuid=uuid, query=query, raise_error=True)
+        else:
+            raise MWebCRUDException(message=MWebCRUDConfig.RECORD_ID_OR_UUID_REQUIRED_MSG)
         return await self.soft_remove_by_model(delete_model=existing_model, record_id=record_id, before_delete=before_delete, after_delete=after_delete)
 
     async def read_from_model(
@@ -172,7 +189,7 @@ class MWebCRUDBase:
         if result and raise_error:
             raise MWebCRUDException(message=MWebCRUDConfig.DUPLICATE_ENTRY_ERROR_MSG, details={field_name: message}, error_code=error_code, http_code=error_http_code)
 
-    def clone(self, model, none_props: list = None):
+    def clone(self, model, none_props: list | None = None):
         if model in orm.session:
             orm.session.expunge(model)
         make_transient(model)

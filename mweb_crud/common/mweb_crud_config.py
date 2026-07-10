@@ -38,8 +38,11 @@ class MWebCRUDConfig:
     DATA_VALIDATION_ERROR_MSG = "Data validation error!"
     RECORD_NOT_FOUND_MSG = "Record not found"
     ID_REQUIRED_MSG = "The ID field is required"
+    UUID_REQUIRED_MSG = "The UUID field is required"
     VALUE_ALREADY_EXISTS_MSG = "This value already exists"
     DUPLICATE_ENTRY_ERROR_MSG = "Duplicate entry detected"
+    RECORD_ID_OR_UUID_REQUIRED_MSG = "Record ID or UUID is required"
+    DTO_IS_REQUIRED_MSG = "DTO is required"
 
     UNKNOWN_ERROR_MSG: str = "Unknown Error Occurred!"
     FILE_SIZE_NOT_MATCH_MSG = "File size exceeds the allowed limit"

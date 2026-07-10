@@ -34,7 +34,7 @@ class CRUDManager(MWebCRUDBase):
     def model(self) -> type[MWebBaseModel]:
         return self._model
 
-    def raise_error(self, message: str, details: dict = None, error_code: int = None, http_code: int = None):
+    def raise_error(self, message: str, details: dict | None = None, error_code: int | None = None, http_code: int | None = None):
         raise MWebCRUDException(message=message, details=details, error_code=error_code, http_code=http_code)
 
     async def create(
@@ -99,7 +99,8 @@ class CRUDManager(MWebCRUDBase):
             query: MWebQueryProcessor | None = None,
             before_validate: Optional[Callable[[dict], None]] = None,
             after_validate: Optional[Callable[[dict], None]] = None,
-            allow_fsp: bool = False):
+            allow_fsp: bool = False,
+            pull_by: str = "id"):
 
         if data is None:
             clean = False
@@ -109,23 +110,33 @@ class CRUDManager(MWebCRUDBase):
                 clean = True
             data = await self._request_context.get_data(validator=request, before_validate=before_validate, after_validate=after_validate, read_from=read_from, clean=clean)
 
-        record_id = DataUtil.dict_value(data=data, key="id")
-        if not record_id and not model_instance:
-            self.raise_error(message=MWebCRUDConfig.ID_REQUIRED_MSG)
+        uuid: str | None = None
+        record_id: int | None = None
+        if pull_by == "uuid":
+            uuid = DataUtil.dict_value(data=data, key="uuid")
+            if not uuid and not model_instance:
+                self.raise_error(message=MWebCRUDConfig.ID_REQUIRED_MSG)
+        else:
+            record_id = DataUtil.dict_value(data=data, key="id")
+            if not record_id and not model_instance:
+                self.raise_error(message=MWebCRUDConfig.ID_REQUIRED_MSG)
 
         fsp: str | None = None
         if allow_files:
             if not model_instance:
-                model_instance = await self.get_by_id(record_id=record_id, raise_error=True, query=query)
-            uuid = model_instance.uuid
+                if record_id:
+                    model_instance = await self.get_by_id(record_id=record_id, raise_error=True, query=query)
+                elif uuid:
+                    model_instance = await self.get_by_uuid(uuid=uuid, raise_error=True, query=query)
+            existing_uuid = model_instance.uuid
 
             if allow_fsp and hasattr(model_instance, "fsp"):
                 fsp = getattr(model_instance, "fsp", None)
             if allow_fsp and not fsp:
                 fsp = MwUtil.fsp()
-            data = await self._mweb_crud_file.process_and_upload_files(request=request, upload_path=upload_path, upload_customizer=upload_customizer, data=data, uuid=uuid, fsp=fsp)
+            data = await self._mweb_crud_file.process_and_upload_files(request=request, upload_path=upload_path, upload_customizer=upload_customizer, data=data, uuid=existing_uuid, fsp=fsp)
 
-        updated_model = await self.save_existing(record_id=record_id, data=data, request=request, before_save=before_save, after_save=after_save, model_instance=model_instance, ignore_keys=ignore_keys, query=query, fsp=fsp)
+        updated_model = await self.save_existing(record_id=record_id, uuid=uuid, data=data, request=request, before_save=before_save, after_save=after_save, model_instance=model_instance, ignore_keys=ignore_keys, query=query, fsp=fsp)
         if as_model:
             return updated_model
 
@@ -136,16 +147,28 @@ class CRUDManager(MWebCRUDBase):
             response_message = MWebCRUDConfig.UPDATE_SUCCESS_MSG
         return await self.make_success_response(model=updated_model, response_message=response_message, response=response)
 
-    async def details(self, record_id: int, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, query: MWebQueryProcessor | None = None, as_model: bool = False, as_transform: bool = False):
-        details = await self.get_by_id(record_id=record_id, query=query, raise_error=True)
+    async def details(self, record_id: int | None = None, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO | None = None, uuid: str | None = None, query: MWebQueryProcessor | None = None, as_model: bool = False, as_transform: bool = False):
+        if record_id:
+            details = await self.get_by_id(record_id=record_id, query=query, raise_error=True)
+        elif uuid:
+            details = await self.get_by_uuid(uuid=uuid, query=query, raise_error=True)
+        else:
+            raise MWebCRUDException(message=MWebCRUDConfig.RECORD_ID_OR_UUID_REQUIRED_MSG)
+
         if as_model:
             return details
+        elif not response:
+            raise MWebCRUDException(message=MWebCRUDConfig.DTO_IS_REQUIRED_MSG)
+
         return await self._response_maker.success_from_model(model=details, transformer=response, as_transform=as_transform)
 
-    async def delete(self, record_id: int, response_message: str | None = None, query: MWebQueryProcessor | None = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):
+    async def delete(self, record_id: int | None = None, uuid: str | None = None, response_message: str | None = None, query: MWebQueryProcessor | None = None, before_delete: Optional[BeforeAfterDeleteCallable] = None, after_delete: Optional[BeforeAfterDeleteCallable] = None):
         if not response_message:
             response_message = MWebCRUDConfig.DELETE_SUCCESS_MSG
-        is_removed = await self.soft_remove(record_id=record_id, query=query, before_delete=before_delete, after_delete=after_delete)
+        if not record_id and not uuid:
+            raise MWebCRUDException(message=MWebCRUDConfig.RECORD_ID_OR_UUID_REQUIRED_MSG)
+
+        is_removed = await self.soft_remove(record_id=record_id, uuid=uuid, query=query, before_delete=before_delete, after_delete=after_delete)
         if is_removed:
             return await self._response_maker.success(content=response_message)
         return await self._response_maker.error(message=MWebCRUDConfig.FAILED_TO_DELETE_RECORD_MSG)

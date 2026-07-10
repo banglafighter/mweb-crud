@@ -65,7 +65,7 @@ class MWebCRUDFile:
     def prepare_name(self, uuid: str, data: dict, validator: MWebBaseDTO | MWebDTO | MWebIDDTO | MWebDatedDTO, upload_customizer: UploadCustomizer) -> dict:
         file_name_map : dict = {}
         custom_file_name: list[UploadFileName] = []
-
+        uuid = str(uuid)
         if upload_customizer is not None and upload_customizer.custom_file_name is not None:
             custom_file_name = upload_customizer.custom_file_name
 

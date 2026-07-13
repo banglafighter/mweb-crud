@@ -37,6 +37,8 @@ class MWebCRUDBase:
         if not query:
             query = self._model.query
 
+        uuid = self.to_uuid(uuid=uuid)
+
         query = query.where(and_(self._model.uuid == uuid))
         return await self.get_first(query=query, message=message, raise_error=raise_error, error_code=error_code, error_http_code=error_http_code)
 
@@ -203,3 +205,16 @@ class MWebCRUDBase:
                 setattr(model, prop, None)
 
         return model
+
+    @classmethod
+    def to_uuid(cls, uuid) -> UUID:
+        if uuid is None:
+            return None
+
+        if isinstance(uuid, UUID):
+            return uuid
+
+        if isinstance(uuid, str):
+            return UUID(uuid)
+
+        raise MWebCRUDException(message=MWebCRUDConfig.INVALID_UUID_MSG)

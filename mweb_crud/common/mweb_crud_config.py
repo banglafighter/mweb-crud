@@ -43,6 +43,7 @@ class MWebCRUDConfig:
     DUPLICATE_ENTRY_ERROR_MSG = "Duplicate entry detected"
     RECORD_ID_OR_UUID_REQUIRED_MSG = "Record ID or UUID is required"
     DTO_IS_REQUIRED_MSG = "DTO is required"
+    INVALID_UUID_MSG = "Invalid UUID"
 
     UNKNOWN_ERROR_MSG: str = "Unknown Error Occurred!"
     FILE_SIZE_NOT_MATCH_MSG = "File size exceeds the allowed limit"

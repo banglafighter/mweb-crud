@@ -110,12 +110,13 @@ class CRUDManager(MWebCRUDBase):
                 clean = True
             data = await self._request_context.get_data(validator=request, before_validate=before_validate, after_validate=after_validate, read_from=read_from, clean=clean)
 
-        uuid: str | None = None
+        uuid: str | UUID | None = None
         record_id: int | None = None
         if pull_by == "uuid":
             uuid = DataUtil.dict_value(data=data, key="uuid")
             if not uuid and not model_instance:
                 self.raise_error(message=MWebCRUDConfig.ID_REQUIRED_MSG)
+            uuid = self.to_uuid(uuid=uuid)
         else:
             record_id = DataUtil.dict_value(data=data, key="id")
             if not record_id and not model_instance:

@@ -71,10 +71,10 @@ class MWebCRUDBase:
             raise MWebCRUDException(message=message, error_code=error_code, http_code=error_http_code)
         return None
 
-    async def save(self, data: dict, request: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, before_save: Optional[BeforeAfterSaveCallable] = None, after_save: Optional[BeforeAfterSaveCallable] = None, model_instance: MWebBaseModel | None = None, uuid: UUID | None = None, ignore_keys: list[str] | None = None, fsp : str | None = None) -> MWebBaseModel | None:
+    async def save(self, data: dict, request: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, before_save: Optional[BeforeAfterSaveCallable] = None, after_save: Optional[BeforeAfterSaveCallable] = None, model_instance: MWebBaseModel | None = None, uuid: UUID | str | None = None, ignore_keys: list[str] | None = None, fsp : str | None = None) -> MWebBaseModel | None:
         model = request.to_model(data=data, model_instance=model_instance, ignore_keys=ignore_keys)
         if uuid:
-            model.uuid = uuid
+            model.uuid = self.to_uuid(uuid=uuid)
 
         # check if model has File Storage Path (fsp) the added it
         if hasattr(model, "fsp"):
@@ -207,7 +207,7 @@ class MWebCRUDBase:
         return model
 
     @classmethod
-    def to_uuid(cls, uuid) -> UUID:
+    def to_uuid(cls, uuid: str | UUID | None) -> UUID:
         if uuid is None:
             return None
 

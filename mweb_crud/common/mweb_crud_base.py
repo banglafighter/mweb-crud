@@ -128,7 +128,7 @@ class MWebCRUDBase:
     async def read_from_model(
             self,
             query: MWebQueryProcessor | None = None,
-            search_fields: list | None = None,
+            search_fields: list | dict | None = None,
             paginate: bool = True,
             is_deleted: bool = False,
             sort: bool = True,

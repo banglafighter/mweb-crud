@@ -7,7 +7,7 @@ from mweb_orm import MWebBaseModel, and_, MWebIDModel, or_, MWebQueryProcessor
 class MWebCBHelper:
 
     @classmethod
-    def set_search(cls, model: type[MWebBaseModel | MWebIDModel], request_context: RequestContext, query: MWebQueryProcessor, search_fields: list | None = None, search_text: str = None):
+    def set_search(cls, model: type[MWebBaseModel | MWebIDModel], request_context: RequestContext, query: MWebQueryProcessor, search_fields: list | dict | None = None, search_text: str = None):
         like = []
 
         if not search_fields or len(search_fields) == 0:
@@ -18,8 +18,22 @@ class MWebCBHelper:
             search = request_context.get_query_param(key=MWebCRUDConfig.SEARCH_FIELD_PARAM_NAME, default=None)
 
         if search:
-            for field in search_fields:
-                like.append(getattr(model, field).ilike("%{}%".format(search)))
+            if isinstance(search_fields, dict):
+                for field, field_type in search_fields.items():
+                    column = getattr(model, field)
+                    try:
+                        if field_type is int:
+                            like.append(column == int(search))
+
+                        elif field_type is float:
+                            like.append(column == float(search))
+                        else:
+                            like.append(column.ilike(f"%{search}%"))
+                    except(ValueError, TypeError):
+                        continue
+            else:
+                for field in search_fields:
+                    like.append(getattr(model, field).ilike("%{}%".format(search)))
             if like:
                 return query.where(or_(*like))
 

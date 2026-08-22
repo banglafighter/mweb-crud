@@ -21,10 +21,16 @@ class MWebRequestURLInfo:
 
 class RequestContext:
 
-    async def get_raw_body(self, default=None):
+    async def get_raw_body(self, default=None, as_string: bool = False):
         try:
             data_body = await mweb_request.get_data()
             if data_body is not None:
+                if as_string:
+                    return (
+                        data_body.decode('utf-8', errors='ignore')
+                        if isinstance(data_body, bytes)
+                        else str(data_body)
+                    )
                 return data_body
             return default
         except Exception as e:

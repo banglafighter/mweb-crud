@@ -68,7 +68,10 @@ class CRUDManager(MWebCRUDBase):
 
         uuid: UUID | None = None
         if allow_files:
-            uuid = MwUtil.uuid7()
+            try:
+                uuid = MwUtil.uuid7()
+            except:
+                uuid = MwUtil.uuid()
             data = await self._mweb_crud_file.process_and_upload_files(request=request, upload_path=upload_path, upload_customizer=upload_customizer, data=data, uuid=str(uuid), fsp=fsp)
 
         saved_model = await self.save(data=data, request=request, before_save=before_save, after_save=after_save, uuid=uuid, ignore_keys=ignore_keys, fsp=fsp)

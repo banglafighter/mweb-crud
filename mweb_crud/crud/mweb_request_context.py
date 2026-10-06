@@ -45,16 +45,7 @@ class RequestContext:
         except Exception as e:
             raise MWebCRUDException(message=str(e))
 
-    async def get_data(self, validator: MWebBaseDTO | MWebDTO | MWebIDDTO | MWebDatedDTO  = None, clean: bool = False, many: bool = False, read_from: Literal["json", "form"] = "json", before_validate: Optional[Callable[[dict], None]] = None, after_validate: Optional[Callable[[dict], None]] = None):
-
-        data: dict | None = None
-        if read_from == "json":
-            wrapped_data = await self.get_json_body()
-            data = DataUtil.dict_value(data=wrapped_data, key="data", default=None)
-        elif read_from == "form":
-            data = await self.form_and_file_to_dict()
-            clean = True
-
+    def validate_data(self, data: dict, validator: MWebBaseDTO | MWebDTO | MWebIDDTO | MWebDatedDTO, clean: bool = False, many: bool = False, before_validate: Optional[Callable[[dict], None]] = None, after_validate: Optional[Callable[[dict], None]] = None):
         if data is None:
             raise MWebCRUDException(message=MWebCRUDConfig.INVALID_JSON_REQUEST_DATA_MSG)
 
@@ -75,6 +66,24 @@ class RequestContext:
             after_validate(data)
 
         return data
+
+    async def get_data(self, validator: MWebBaseDTO | MWebDTO | MWebIDDTO | MWebDatedDTO  = None, clean: bool = False, many: bool = False, read_from: Literal["json", "form"] = "json", before_validate: Optional[Callable[[dict], None]] = None, after_validate: Optional[Callable[[dict], None]] = None):
+        data: dict | None = None
+        if read_from == "json":
+            wrapped_data = await self.get_json_body()
+            data = DataUtil.dict_value(data=wrapped_data, key="data", default=None)
+        elif read_from == "form":
+            data = await self.form_and_file_to_dict()
+            clean = True
+
+        return self.validate_data(
+            data=data,
+            validator=validator,
+            clean=clean,
+            many=many,
+            before_validate=before_validate,
+            after_validate=after_validate
+        )
 
     async def form_data(self, default=None):
         try:

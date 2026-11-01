@@ -6,6 +6,13 @@ from mweb import FileStorage
 from .df_helper import validate_enum_value, BaseEnum
 
 
+class EmptyStringMixin(fields.Field):
+    def deserialize(self, value, attr=None, data=None, **kwargs):
+        if isinstance(value, str) and not value.strip() and self.allow_none:
+            value = None
+
+        return super().deserialize(value, attr, data, **kwargs)
+
 class ExtendedFields:
     xlImport: bool = True
     xlExport: bool = True
@@ -26,7 +33,7 @@ class String(fields.String, ExtendedFields):
         return super()._deserialize(value, attr, data, **kwargs)
 
 
-class Integer(fields.Integer, ExtendedFields):
+class Integer(EmptyStringMixin, fields.Integer, ExtendedFields):
     def __init__(self, *args, xl_import=False, xl_export=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.xlImport = xl_import
@@ -37,7 +44,7 @@ class UUID(fields.UUID):
     pass
 
 
-class Float(fields.Float, ExtendedFields):
+class Float(EmptyStringMixin, fields.Float, ExtendedFields):
     def __init__(self, *args, xl_import=False, xl_export=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.xlImport = xl_import
@@ -48,7 +55,7 @@ class Decimal(fields.Decimal):
     pass
 
 
-class Boolean(fields.Boolean, ExtendedFields):
+class Boolean(EmptyStringMixin, fields.Boolean, ExtendedFields):
     def __init__(self, *args, xl_import=False, xl_export=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.xlImport = xl_import

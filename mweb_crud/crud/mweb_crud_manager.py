@@ -90,6 +90,7 @@ class CRUDManager(MWebCRUDBase):
             request: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO,
             response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO | None = None,
             response_message: str | None = None,
+            load_error_message: str | None = None,
             data: dict | None = None,
             before_save: Optional[BeforeAfterSaveCallable] = None,
             after_save: Optional[BeforeAfterSaveCallable] = None,
@@ -129,9 +130,9 @@ class CRUDManager(MWebCRUDBase):
         if allow_files:
             if not model_instance:
                 if record_id:
-                    model_instance = await self.get_by_id(record_id=record_id, raise_error=True, query=query)
+                    model_instance = await self.get_by_id(record_id=record_id, raise_error=True, query=query, message=load_error_message)
                 elif uuid:
-                    model_instance = await self.get_by_uuid(uuid=uuid, raise_error=True, query=query)
+                    model_instance = await self.get_by_uuid(uuid=uuid, raise_error=True, query=query, message=load_error_message)
             existing_uuid = model_instance.uuid
 
             if allow_fsp and hasattr(model_instance, "fsp"):

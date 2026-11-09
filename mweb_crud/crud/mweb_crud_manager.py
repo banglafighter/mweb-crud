@@ -151,11 +151,11 @@ class CRUDManager(MWebCRUDBase):
             response_message = MWebCRUDConfig.UPDATE_SUCCESS_MSG
         return await self.make_success_response(model=updated_model, response_message=response_message, response=response)
 
-    async def details(self, record_id: int | None = None, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO | None = None, uuid: str | None = None, query: MWebQueryProcessor | None = None, as_model: bool = False, as_transform: bool = False):
+    async def details(self, record_id: int | None = None, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO | None = None, uuid: str | None = None, query: MWebQueryProcessor | None = None, as_model: bool = False, as_transform: bool = False, message: str | None = None):
         if record_id:
-            details = await self.get_by_id(record_id=record_id, query=query, raise_error=True)
+            details = await self.get_by_id(record_id=record_id, query=query, raise_error=True, message=message)
         elif uuid:
-            details = await self.get_by_uuid(uuid=uuid, query=query, raise_error=True)
+            details = await self.get_by_uuid(uuid=uuid, query=query, raise_error=True, message=message)
         else:
             raise MWebCRUDException(message=MWebCRUDConfig.RECORD_ID_OR_UUID_REQUIRED_MSG)
 

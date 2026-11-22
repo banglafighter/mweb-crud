@@ -173,6 +173,8 @@ class RequestContext:
             value = data.getlist(key, type)
             if len(value) == 1:
                 return value[0]
+            elif len(value) == 0:
+                return default
             return value
         return default
 

@@ -193,7 +193,7 @@ class CRUDManager(MWebCRUDBase):
 
         return await self._response_maker.success_from_model(model=result, transformer=response, as_dict=as_dict, as_transform=as_transform)
 
-    async def paginated_read_all(self, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, search_fields: list | dict | None = None, sort_field: str | None = None, sort_order: str | None = None, sort: bool = True, item_per_page: int | None = None, query: MWebQueryProcessor | None = None, as_list: bool = False, as_dict: bool = False, as_transform: bool = False):
+    async def paginated_read_all(self, response: MWebDTO | MWebBaseDTO | MWebIDDTO | MWebDatedDTO, search_fields: list | dict | None = None, sort_field: str | None = None, sort_order: str | None = None, sort: bool = True, item_per_page: int | None = None, query: MWebQueryProcessor | None = None, as_list: bool = False, as_dict: bool = False, as_transform: bool = False, message: str | None = None):
         result = await self.read_from_model(
             search_fields=search_fields,
             sort_field=sort_field,
@@ -207,7 +207,7 @@ class CRUDManager(MWebCRUDBase):
         if as_list:
             return result
 
-        return await self._response_maker.success_from_model(model=result, transformer=response, as_dict=as_dict, as_transform=as_transform)
+        return await self._response_maker.success_from_model(model=result, transformer=response, as_dict=as_dict, as_transform=as_transform, message=message)
 
     async def hard_delete(self, record_id: int, query: MWebQueryProcessor | None = None):
         existing_model = await self.get_by_id(record_id=record_id, query=query, raise_error=True)
